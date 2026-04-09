@@ -45,8 +45,8 @@
     display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap;
   }
   .logos-row img {
-    height: 40px; width: auto; object-fit: contain;
-    filter: brightness(0) invert(1); opacity: 0.92;
+    height: 36px; width: auto; object-fit: contain;
+    background: rgba(255,255,255,0.95); padding: 6px 12px; border-radius: 8px;
   }
   .logos-row .logo-divider {
     width:1px; height:30px; background:rgba(255,255,255,0.3);
@@ -108,8 +108,6 @@
   }
   .chart-card h3 { font-size:0.95rem; font-weight:600; margin-bottom:1rem; color:var(--primary); }
   .chart-wrapper { position:relative; width:100%; height:280px; }
-  .chart-card.timeline { grid-column: 1 / -1; }
-  .chart-card.timeline .chart-wrapper { height:220px; }
 
   /* Provider Database Section */
   .provider-section { margin-top: 1rem; }
@@ -158,13 +156,11 @@
 
   @media (max-width:1024px) {
     .charts-grid { grid-template-columns: 1fr 1fr; }
-    .chart-card.timeline { grid-column: 1 / -1; }
   }
   @media (max-width:768px) {
     .header { padding:1.25rem; }
     .scorecard-row, .content { padding-left:1rem; padding-right:1rem; }
     .charts-grid { grid-template-columns:1fr; }
-    .chart-card.timeline { grid-column: auto; }
     .logos-row img { height:30px; }
   }
 </style>
@@ -213,7 +209,6 @@
   <div class="charts-grid">
     <div class="chart-card"><h3>Sign-Ups by Clinical Specialty</h3><div class="chart-wrapper"><canvas id="chartSpecialty"></canvas></div></div>
     <div class="chart-card"><h3>Sign-Ups by Vendor</h3><div class="chart-wrapper"><canvas id="chartVendor"></canvas></div></div>
-    <div class="chart-card timeline"><h3>Sign-Ups Over Time</h3><div class="chart-wrapper"><canvas id="chartTimeline"></canvas></div></div>
   </div>
 
   <!-- PROVIDER DATABASE SECTION -->
@@ -339,7 +334,6 @@ function countBy(data, field, excludeBlanks) {
 function renderCharts(data) {
   renderDoughnut('chartSpecialty', countBy(data,'Clinical Specialty', true).slice(0,10));
   renderBar('chartVendor', countBy(data,'Vendor', true));
-  renderTimeline('chartTimeline', data);
 }
 
 function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
@@ -380,39 +374,6 @@ function renderBar(id, entries) {
     },
     options: { indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
       scales:{ x:{ beginAtZero:true, ticks:{precision:0} }, y:{ ticks:{font:{size:12}} } } }
-  });
-}
-
-function renderTimeline(id, data) {
-  destroyChart(id);
-  var dated = data.filter(r => {
-    var d = r['Account Created Date'];
-    return d && d.toString().trim() !== '';
-  });
-  if (!dated.length) {
-    charts[id] = new Chart(document.getElementById(id), {
-      type:'bar', data:{labels:['No date data'],datasets:[{data:[0]}]},
-      options:{responsive:true, plugins:{legend:{display:false}}}
-    });
-    return;
-  }
-  const byMonth = {};
-  dated.forEach(r => {
-    const d = new Date(r['Account Created Date']);
-    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-    byMonth[key] = (byMonth[key]||0)+1;
-  });
-  const sorted = Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0]));
-  charts[id] = new Chart(document.getElementById(id), {
-    type:'line',
-    data: {
-      labels: sorted.map(e=>e[0]),
-      datasets: [{ label:'Sign-Ups', data: sorted.map(e=>e[1]),
-        borderColor:COLORS[0], backgroundColor:'rgba(46,125,140,0.1)',
-        fill:true, tension:0.3, pointRadius:5, pointBackgroundColor:COLORS[0] }]
-    },
-    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
-      scales:{ y:{beginAtZero:true, ticks:{precision:0}}, x:{ticks:{font:{size:11}}} } }
   });
 }
 

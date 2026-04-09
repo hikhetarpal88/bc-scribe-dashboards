@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BC AI Scribe Self-Pay Dashboards</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:#f0f4f8; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+  .container { text-align:center; padding:3rem 2rem; }
+  h1 { font-size:2rem; color:#1e3a5f; margin-bottom:0.5rem; }
+  p { color:#6b7280; margin-bottom:2.5rem; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; max-width:800px; margin:0 auto; }
+  a {
+    display:block; padding:1.5rem; background:#fff; border-radius:1rem; text-decoration:none;
+    color:#1e3a5f; font-size:1.25rem; font-weight:700; box-shadow:0 4px 24px rgba(0,0,0,0.06);
+    transition:transform 0.2s, box-shadow 0.2s;
+  }
+  a:hover { transform:translateY(-3px); box-shadow:0 8px 32px rgba(0,0,0,0.1); }
+  a span { display:block; font-size:0.8rem; color:#6b7280; font-weight:400; margin-top:0.25rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>BC AI Scribe Self-Pay Dashboards</h1>
+  <p>Select a Health Authority to view its dashboard</p>
+  <div class="grid">
+    <a href="phsa.html">PHSA<span>Provincial Health</span></a>
+    <a href="vch.html">VCH<span>Vancouver Coastal</span></a>
+    <a href="fha.html">FHA<span>Fraser Health</span></a>
+    <a href="phc.html">PHC<span>Providence Health</span></a>
+    <a href="viha.html">VIHA<span>Island Health</span></a>
+    <a href="ih.html">IH<span>Interior Health</span></a>
+    <a href="nh.html">NH<span>Northern Health</span></a>
+  </div>
+</div>
+</body>
+</html>

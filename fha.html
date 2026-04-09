@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FHA — BC Scribe Self-Pay Program Dashboard</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="dns-prefetch" href="https://script.google.com">
+<script>
+  // Start data fetch immediately (runs in parallel with Chart.js download)
+  var __dataPromise = fetch('https://script.google.com/macros/s/AKfycbw5mxQzV4m9nFrhHGDboWNx_MtBJOvMJ9725_wkfEg9TrrG2H9bd6dQYVCWSMGYlNZ7/exec?ha=FHA').then(function(r){return r.json();});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -267,8 +274,7 @@ function dedup(rows) {
 
 async function loadData() {
   try {
-    const res = await fetch(PROXY + '?ha=' + HA);
-    const json = await res.json();
+    const json = window.__dataPromise ? await window.__dataPromise : await fetch(PROXY + '?ha=' + HA).then(r=>r.json());
     if (json.error) throw new Error(json.error);
     RAW_DATA = dedup(json.data || []);
     document.getElementById('refreshInfo').textContent =

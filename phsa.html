@@ -99,7 +99,7 @@
 
   /* Charts Grid */
   .charts-grid {
-    display:grid; grid-template-columns: repeat(3, 1fr);
+    display:grid; grid-template-columns: repeat(2, 1fr);
     gap:1.5rem; margin-bottom:1.5rem;
   }
   .chart-card {
@@ -107,9 +107,9 @@
     box-shadow: 0 2px 16px rgba(0,0,0,0.04);
   }
   .chart-card h3 { font-size:0.95rem; font-weight:600; margin-bottom:1rem; color:var(--primary); }
-  .chart-wrapper { position:relative; width:100%; max-height:320px; }
+  .chart-wrapper { position:relative; width:100%; height:280px; }
   .chart-card.timeline { grid-column: 1 / -1; }
-  .chart-card.timeline .chart-wrapper { max-height:250px; }
+  .chart-card.timeline .chart-wrapper { height:220px; }
 
   /* Provider Database Section */
   .provider-section { margin-top: 1rem; }
@@ -180,8 +180,6 @@
     <div class="logos-row">
       <img src="logos/phsa.png" alt="PHSA Logo">
       <div class="logo-divider"></div>
-      <img src="logos/phsa.png" alt="PHSA Logo">
-      <div class="logo-divider"></div>
       <img src="logos/him.png" alt="HIM Logo">
     </div>
   </div>
@@ -191,7 +189,6 @@
 <div class="scorecard-row">
   <div class="scorecard"><div class="value" id="totalSignups">-</div><div class="label">Total Sign-Ups</div></div>
   <div class="scorecard"><div class="value" id="totalVendors">-</div><div class="label">Vendors</div></div>
-  <div class="scorecard"><div class="value" id="totalDesignations">-</div><div class="label">Designations</div></div>
   <div class="scorecard"><div class="value" id="totalSpecialties">-</div><div class="label">Specialties</div></div>
 </div>
 
@@ -205,26 +202,13 @@
       <select id="filterVendor"><option value="">All Vendors</option></select>
     </div>
     <div class="filter-group">
-      <label>Designation</label>
-      <select id="filterDesignation"><option value="">All Designations</option></select>
-    </div>
-    <div class="filter-group">
       <label>Specialty</label>
       <select id="filterSpecialty"><option value="">All Specialties</option></select>
-    </div>
-    <div class="filter-group">
-      <label>From</label>
-      <input type="date" id="filterDateFrom">
-    </div>
-    <div class="filter-group">
-      <label>To</label>
-      <input type="date" id="filterDateTo">
     </div>
     <button class="btn-reset" onclick="resetFilters()">Reset</button>
   </div>
 
   <div class="charts-grid">
-    <div class="chart-card"><h3>Sign-Ups by Professional Designation</h3><div class="chart-wrapper"><canvas id="chartDesignation"></canvas></div></div>
     <div class="chart-card"><h3>Sign-Ups by Clinical Specialty</h3><div class="chart-wrapper"><canvas id="chartSpecialty"></canvas></div></div>
     <div class="chart-card"><h3>Sign-Ups by Vendor</h3><div class="chart-wrapper"><canvas id="chartVendor"></canvas></div></div>
     <div class="chart-card timeline"><h3>Sign-Ups Over Time</h3><div class="chart-wrapper"><canvas id="chartTimeline"></canvas></div></div>
@@ -244,7 +228,7 @@
       </div>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>Name</th><th>Email</th><th>Designation</th><th>Clinical Specialty</th><th>Vendor</th><th>Sign-Up Date</th></tr></thead>
+          <thead><tr><th>Name</th><th>Email</th><th>Clinical Specialty</th><th>Vendor</th></tr></thead>
           <tbody id="tableBody"></tbody>
         </table>
       </div>
@@ -294,7 +278,6 @@ async function loadData() {
 
 function populateFilters() {
   fillSelect('filterVendor', unique('Vendor'), 'All Vendors');
-  fillSelect('filterDesignation', unique('Professional Designation'), 'All Designations');
   fillSelect('filterSpecialty', unique('Clinical Specialty'), 'All Specialties');
 }
 
@@ -312,22 +295,11 @@ function fillSelect(id, values, allLabel) {
 
 function getFiltered() {
   const v = document.getElementById('filterVendor').value;
-  const d = document.getElementById('filterDesignation').value;
   const s = document.getElementById('filterSpecialty').value;
-  const from = document.getElementById('filterDateFrom').value;
-  const to = document.getElementById('filterDateTo').value;
   const q = document.getElementById('searchInput').value.toLowerCase().trim();
   return RAW_DATA.filter(r => {
     if (v && r['Vendor'] !== v) return false;
-    if (d && r['Professional Designation'] !== d) return false;
     if (s && r['Clinical Specialty'] !== s) return false;
-    if (from || to) {
-      const dt = r['Account Created Date'];
-      if (!dt) return false;
-      const rd = dt.slice(0,10);
-      if (from && rd < from) return false;
-      if (to && rd > to) return false;
-    }
     if (q) {
       const name = ((r['First Name']||'')+' '+(r['Last Name']||'')).toLowerCase();
       const email = (r['Health Authority Email']||'').toLowerCase();
@@ -348,7 +320,6 @@ function applyFilters() {
 function updateScorecards(data) {
   document.getElementById('totalSignups').textContent = data.length;
   document.getElementById('totalVendors').textContent = new Set(data.map(r=>r['Vendor']).filter(Boolean)).size;
-  document.getElementById('totalDesignations').textContent = new Set(data.map(r=>r['Professional Designation']).filter(Boolean)).size;
   document.getElementById('totalSpecialties').textContent = new Set(data.map(r=>r['Clinical Specialty']).filter(Boolean)).size;
 }
 
@@ -364,7 +335,6 @@ function countBy(data, field, excludeBlanks) {
 }
 
 function renderCharts(data) {
-  renderDoughnut('chartDesignation', countBy(data,'Professional Designation', true));
   renderDoughnut('chartSpecialty', countBy(data,'Clinical Specialty', true).slice(0,10));
   renderBar('chartVendor', countBy(data,'Vendor', true));
   renderTimeline('chartTimeline', data);
@@ -450,17 +420,13 @@ function renderTable(data) {
   document.getElementById('tableCount').textContent = 'Showing ' + shown + ' of ' + total + ' providers';
   const tb = document.getElementById('tableBody');
   if (!data.length) {
-    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted);">No matching records found</td></tr>';
+    tb.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--muted);">No matching records found</td></tr>';
     return;
   }
   tb.innerHTML = data.map(r => {
-    const desig = r['Professional Designation'];
-    const dateRaw = r['Account Created Date'];
-    const desigDisplay = (desig && desig.toString().trim() !== '') ? esc(desig) : '\u2014';
-    const date = (dateRaw && dateRaw.toString().trim() !== '') ? new Date(dateRaw).toLocaleDateString('en-CA') : '\u2014';
     return '<tr><td>'+esc((r['First Name']||'')+' '+(r['Last Name']||''))+'</td><td>'+esc(r['Health Authority Email']||'\u2014')+'</td><td>'
-      +desigDisplay+'</td><td>'+esc(r['Clinical Specialty']||'\u2014')+'</td><td>'
-      +esc(r['Vendor']||'\u2014')+'</td><td>'+date+'</td></tr>';
+      +esc(r['Clinical Specialty']||'\u2014')+'</td><td>'
+      +esc(r['Vendor']||'\u2014')+'</td></tr>';
   }).join('');
 }
 
@@ -468,10 +434,7 @@ function esc(s) { const d=document.createElement('div'); d.textContent=s; return
 
 function resetFilters() {
   document.getElementById('filterVendor').value='';
-  document.getElementById('filterDesignation').value='';
   document.getElementById('filterSpecialty').value='';
-  document.getElementById('filterDateFrom').value='';
-  document.getElementById('filterDateTo').value='';
   document.getElementById('searchInput').value='';
   applyFilters();
 }

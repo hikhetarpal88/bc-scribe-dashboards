@@ -278,7 +278,7 @@ async function loadData() {
     if (json.error) throw new Error(json.error);
     RAW_DATA = dedup(json.data || []);
     document.getElementById('refreshInfo').textContent =
-      'Last refreshed: ' + new Date(json.timestamp).toLocaleString() + ' \u2014 ' + json.count + ' records';
+      'Last refreshed: ' + new Date(json.timestamp).toLocaleString() + ' \u2014 ' + RAW_DATA.length + ' providers';
     populateFilters();
     applyFilters();
   } catch(e) {

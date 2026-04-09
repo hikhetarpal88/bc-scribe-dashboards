@@ -3,107 +3,148 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NH — AI Scribe Self-Pay Dashboard</title>
+<title>NH — BC Scribe Self-Pay Program Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
   :root {
-    --primary: #1e3a5f;
-    --accent: #2c7be5;
-    --bg: #f0f4f8;
+    --primary: #1a5c6b;
+    --accent: #2E7D8C;
+    --accent-light: #3a9aad;
+    --bg: #f4f8f9;
     --card: #ffffff;
     --text: #1a1a2e;
     --muted: #6b7280;
-    --border: #e2e8f0;
-    --success: #10b981;
-    --gradient-start: #1e3a5f;
-    --gradient-end: #2c7be5;
+    --border: #d9e6ea;
+    --gradient-start: #1a5c6b;
+    --gradient-end: #2E7D8C;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
 
   /* Header */
   .header {
-    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-    color: #fff; padding: 2rem 2.5rem; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end), var(--accent-light));
+    color: #fff; padding: 1.5rem 2.5rem 1.25rem; position: relative; overflow: hidden;
   }
   .header::before {
-    content:''; position:absolute; top:-50%; right:-10%; width:400px; height:400px;
-    background: rgba(255,255,255,0.05); border-radius:50%;
+    content:''; position:absolute; top:-60%; right:-5%; width:500px; height:500px;
+    background: rgba(255,255,255,0.04); border-radius:50%;
   }
-  .header-top { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
-  .header h1 { font-size:1.75rem; font-weight:700; letter-spacing:-0.5px; }
-  .header .ha-badge {
-    background: rgba(255,255,255,0.2); padding: 0.4rem 1.2rem; border-radius: 2rem;
-    font-size: 0.85rem; font-weight: 600; backdrop-filter: blur(10px);
+  .header::after {
+    content:''; position:absolute; bottom:-40%; left:10%; width:300px; height:300px;
+    background: rgba(255,255,255,0.03); border-radius:50%;
   }
-  .header .subtitle { opacity:0.85; margin-top:0.25rem; font-size:0.95rem; }
-  .header .refresh-info { opacity:0.6; font-size:0.8rem; margin-top:0.75rem; }
+  .header-top { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; position:relative; z-index:1; }
+  .header-title-section { display:flex; flex-direction:column; gap:0.25rem; }
+  .header h1 { font-size:1.6rem; font-weight:700; letter-spacing:-0.5px; }
+  .header .subtitle { opacity:0.85; font-size:0.9rem; }
+  .header .refresh-info { opacity:0.6; font-size:0.78rem; margin-top:0.5rem; position:relative; z-index:1; }
+
+  /* Logos row */
+  .logos-row {
+    display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap;
+  }
+  .logos-row img {
+    height: 40px; width: auto; object-fit: contain;
+    filter: brightness(0) invert(1); opacity: 0.92;
+  }
+  .logos-row .logo-divider {
+    width:1px; height:30px; background:rgba(255,255,255,0.3);
+  }
 
   /* Scorecard */
   .scorecard-row {
-    display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-    gap:1.25rem; padding:1.5rem 2.5rem; margin-top:-1.5rem; position:relative; z-index:2;
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+    gap:1.25rem; padding:1.5rem 2.5rem; margin-top:-1.25rem; position:relative; z-index:2;
   }
   .scorecard {
-    background: var(--card); border-radius:1rem; padding:1.5rem; text-align:center;
+    background: var(--card); border-radius:1rem; padding:1.25rem; text-align:center;
     box-shadow: 0 4px 24px rgba(0,0,0,0.06); transition: transform 0.2s;
+    border-top: 3px solid var(--accent);
   }
   .scorecard:hover { transform: translateY(-2px); }
-  .scorecard .value { font-size:2.5rem; font-weight:800; color: var(--primary); }
-  .scorecard .label { font-size:0.85rem; color: var(--muted); margin-top:0.25rem; text-transform:uppercase; letter-spacing:0.5px; }
+  .scorecard .value { font-size:2.25rem; font-weight:800; color: var(--accent); }
+  .scorecard .label { font-size:0.8rem; color: var(--muted); margin-top:0.2rem; text-transform:uppercase; letter-spacing:0.5px; }
 
   /* Content */
   .content { padding: 0 2.5rem 2.5rem; }
 
+  /* Section titles */
+  .section-title {
+    font-size:1.15rem; font-weight:700; color:var(--primary); margin:1.5rem 0 1rem;
+    padding-bottom:0.5rem; border-bottom:2px solid var(--accent); display:inline-block;
+  }
+
   /* Filters */
   .filters {
-    display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center;
+    display:flex; flex-wrap:wrap; gap:0.75rem; align-items:flex-end;
     background: var(--card); padding:1.25rem 1.5rem; border-radius:1rem;
     box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom:1.5rem;
+    border-left: 4px solid var(--accent);
   }
-  .filters label { font-size:0.8rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+  .filters label { font-size:0.75rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; }
   .filters select, .filters input[type="date"] {
     padding:0.5rem 0.75rem; border:1px solid var(--border); border-radius:0.5rem;
-    font-size:0.9rem; background:#fff; color:var(--text); min-width:160px;
+    font-size:0.875rem; background:#fff; color:var(--text); min-width:155px;
     outline:none; transition: border 0.2s;
   }
-  .filters select:focus, .filters input[type="date"]:focus { border-color: var(--accent); }
+  .filters select:focus, .filters input[type="date"]:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(46,125,140,0.15); }
   .filter-group { display:flex; flex-direction:column; gap:0.25rem; }
   .btn-reset {
     padding:0.5rem 1.25rem; background: var(--accent); color:#fff; border:none;
     border-radius:0.5rem; cursor:pointer; font-size:0.85rem; font-weight:600;
     transition: background 0.2s; margin-left:auto;
   }
-  .btn-reset:hover { background: #1a68d1; }
+  .btn-reset:hover { background: var(--primary); }
 
   /* Charts Grid */
   .charts-grid {
-    display:grid; grid-template-columns: repeat(auto-fit, minmax(380px,1fr));
+    display:grid; grid-template-columns: repeat(3, 1fr);
     gap:1.5rem; margin-bottom:1.5rem;
   }
   .chart-card {
     background: var(--card); border-radius:1rem; padding:1.5rem;
     box-shadow: 0 2px 16px rgba(0,0,0,0.04);
   }
-  .chart-card h3 { font-size:1rem; font-weight:600; margin-bottom:1rem; color:var(--primary); }
+  .chart-card h3 { font-size:0.95rem; font-weight:600; margin-bottom:1rem; color:var(--primary); }
   .chart-wrapper { position:relative; width:100%; }
+  .chart-card.timeline { grid-column: 1 / -1; }
+
+  /* Provider Database Section */
+  .provider-section { margin-top: 1rem; }
+
+  /* Search bar */
+  .search-bar {
+    display:flex; gap:0.75rem; align-items:center; margin-bottom:1rem;
+  }
+  .search-bar input {
+    flex:1; max-width:500px; padding:0.65rem 1rem 0.65rem 2.5rem;
+    border:1px solid var(--border); border-radius:0.75rem; font-size:0.9rem;
+    outline:none; transition: border 0.2s, box-shadow 0.2s;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.442.156a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E") no-repeat 0.75rem center;
+  }
+  .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,125,140,0.12); }
+  .search-bar input::placeholder { color:#aab4be; }
 
   /* Table */
   .table-card {
     background: var(--card); border-radius:1rem; padding:1.5rem;
     box-shadow: 0 2px 16px rgba(0,0,0,0.04); overflow:hidden;
   }
-  .table-card h3 { font-size:1rem; font-weight:600; margin-bottom:1rem; color:var(--primary); }
-  .table-scroll { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+  .table-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem; }
+  .table-card h3 { font-size:1rem; font-weight:600; color:var(--primary); }
+  .table-count { font-size:0.85rem; color:var(--muted); }
+  .table-scroll { overflow-x:auto; max-height:600px; overflow-y:auto; }
+  table { width:100%; border-collapse:collapse; font-size:0.85rem; }
   thead th {
-    background: var(--primary); color:#fff; padding:0.75rem 1rem;
-    text-align:left; font-weight:600; white-space:nowrap; position:sticky; top:0;
+    background: var(--accent); color:#fff; padding:0.7rem 1rem;
+    text-align:left; font-weight:600; white-space:nowrap; position:sticky; top:0; z-index:1;
   }
   tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-  tbody tr:hover { background: #f7fafc; }
-  tbody td { padding:0.65rem 1rem; white-space:nowrap; }
-  .table-count { font-size:0.85rem; color:var(--muted); margin-bottom:0.75rem; }
+  tbody tr:hover { background: #eef6f7; }
+  tbody td { padding:0.6rem 1rem; white-space:nowrap; }
+  tbody tr:nth-child(even) { background: #f9fcfc; }
+  tbody tr:nth-child(even):hover { background: #eef6f7; }
 
   /* Loading */
   .loading { display:flex; justify-content:center; align-items:center; min-height:400px; flex-direction:column; gap:1rem; }
@@ -112,12 +153,18 @@
   .error { color:#dc2626; text-align:center; padding:2rem; }
 
   /* Footer */
-  .footer { text-align:center; padding:1.5rem; color:var(--muted); font-size:0.8rem; border-top:1px solid var(--border); margin-top:1rem; }
+  .footer { text-align:center; padding:1.25rem; color:var(--muted); font-size:0.78rem; border-top:1px solid var(--border); margin-top:1rem; }
 
+  @media (max-width:1024px) {
+    .charts-grid { grid-template-columns: 1fr 1fr; }
+    .chart-card.timeline { grid-column: 1 / -1; }
+  }
   @media (max-width:768px) {
-    .header { padding:1.5rem; }
+    .header { padding:1.25rem; }
     .scorecard-row, .content { padding-left:1rem; padding-right:1rem; }
     .charts-grid { grid-template-columns:1fr; }
+    .chart-card.timeline { grid-column: auto; }
+    .logos-row img { height:30px; }
   }
 </style>
 </head>
@@ -125,11 +172,17 @@
 
 <div class="header">
   <div class="header-top">
-    <div>
-      <h1>AI Scribe Self-Pay Dashboard</h1>
-      <div class="subtitle">BC Health Authority Sign-Up Tracker</div>
+    <div class="header-title-section">
+      <h1>BC Scribe Self-Pay Program Dashboard</h1>
+      <div class="subtitle">NH &mdash; Northern Health</div>
     </div>
-    <div class="ha-badge">NH</div>
+    <div class="logos-row">
+      <img src="logos/nh.png" alt="NH Logo">
+      <div class="logo-divider"></div>
+      <img src="logos/phsa.png" alt="PHSA Logo">
+      <div class="logo-divider"></div>
+      <img src="logos/him.png" alt="HIM Logo">
+    </div>
   </div>
   <div class="refresh-info" id="refreshInfo">Loading data...</div>
 </div>
@@ -142,6 +195,9 @@
 </div>
 
 <div class="content">
+  <!-- OVERVIEW SECTION -->
+  <div class="section-title">Overview</div>
+
   <div class="filters">
     <div class="filter-group">
       <label>Vendor</label>
@@ -168,44 +224,66 @@
 
   <div class="charts-grid">
     <div class="chart-card"><h3>Sign-Ups by Professional Designation</h3><div class="chart-wrapper"><canvas id="chartDesignation"></canvas></div></div>
+    <div class="chart-card"><h3>Sign-Ups by Clinical Specialty</h3><div class="chart-wrapper"><canvas id="chartSpecialty"></canvas></div></div>
     <div class="chart-card"><h3>Sign-Ups by Vendor</h3><div class="chart-wrapper"><canvas id="chartVendor"></canvas></div></div>
-    <div class="chart-card"><h3>Sign-Ups by Clinical Specialty (Top 10)</h3><div class="chart-wrapper"><canvas id="chartSpecialty"></canvas></div></div>
-    <div class="chart-card"><h3>Sign-Ups Over Time</h3><div class="chart-wrapper"><canvas id="chartTimeline"></canvas></div></div>
+    <div class="chart-card timeline"><h3>Sign-Ups Over Time</h3><div class="chart-wrapper"><canvas id="chartTimeline"></canvas></div></div>
   </div>
 
-  <div class="table-card">
-    <h3>Provider Details</h3>
-    <div class="table-count" id="tableCount"></div>
-    <div class="table-scroll">
-      <table>
-        <thead><tr><th>Name</th><th>Email</th><th>Designation</th><th>Clinical Specialty</th><th>Vendor</th><th>Sign-Up Date</th></tr></thead>
-        <tbody id="tableBody"></tbody>
-      </table>
+  <!-- PROVIDER DATABASE SECTION -->
+  <div class="provider-section">
+    <div class="section-title">Provider Database</div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Provider Details</h3>
+        <div class="table-count" id="tableCount"></div>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search by name, email, or specialty..." oninput="applyFilters()">
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Designation</th><th>Clinical Specialty</th><th>Vendor</th><th>Sign-Up Date</th></tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="footer">
-  BC Health — AI Scribe Self-Pay Dashboard &bull; Data refreshes automatically from master sheet
+  BC Health &mdash; AI Scribe Self-Pay Dashboard &bull; Data refreshes automatically from master sheet
 </div>
 
 <script>
 const HA = 'NH';
+const HA_FULL = 'Northern Health';
 const PROXY = 'https://script.google.com/macros/s/AKfycbw5mxQzV4m9nFrhHGDboWNx_MtBJOvMJ9725_wkfEg9TrrG2H9bd6dQYVCWSMGYlNZ7/exec';
 
-const COLORS = ['#2c7be5','#00d4aa','#f5803e','#a855f7','#ec4899','#eab308','#14b8a6','#6366f1','#f43f5e','#84cc16','#06b6d4','#d946ef'];
+const COLORS = ['#2E7D8C','#3aadbe','#f5803e','#a855f7','#ec4899','#eab308','#14b8a6','#6366f1','#f43f5e','#84cc16','#06b6d4','#d946ef'];
 
 let RAW_DATA = [];
 let charts = {};
+
+function dedup(rows) {
+  const seen = new Set();
+  return rows.filter(r => {
+    const email = (r['Health Authority Email']||'').toLowerCase().trim();
+    if (!email) return true;
+    if (seen.has(email)) return false;
+    seen.add(email);
+    return true;
+  });
+}
 
 async function loadData() {
   try {
     const res = await fetch(PROXY + '?ha=' + HA);
     const json = await res.json();
     if (json.error) throw new Error(json.error);
-    RAW_DATA = json.data || [];
+    RAW_DATA = dedup(json.data || []);
     document.getElementById('refreshInfo').textContent =
-      'Last refreshed: ' + new Date(json.timestamp).toLocaleString() + ' — ' + json.count + ' records';
+      'Last refreshed: ' + new Date(json.timestamp).toLocaleString() + ' \u2014 ' + json.count + ' records';
     populateFilters();
     applyFilters();
   } catch(e) {
@@ -237,6 +315,7 @@ function getFiltered() {
   const s = document.getElementById('filterSpecialty').value;
   const from = document.getElementById('filterDateFrom').value;
   const to = document.getElementById('filterDateTo').value;
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
   return RAW_DATA.filter(r => {
     if (v && r['Vendor'] !== v) return false;
     if (d && r['Professional Designation'] !== d) return false;
@@ -247,6 +326,12 @@ function getFiltered() {
       const rd = dt.slice(0,10);
       if (from && rd < from) return false;
       if (to && rd > to) return false;
+    }
+    if (q) {
+      const name = ((r['First Name']||'')+' '+(r['Last Name']||'')).toLowerCase();
+      const email = (r['Health Authority Email']||'').toLowerCase();
+      const spec = (r['Clinical Specialty']||'').toLowerCase();
+      if (!name.includes(q) && !email.includes(q) && !spec.includes(q)) return false;
     }
     return true;
   });
@@ -266,23 +351,54 @@ function updateScorecards(data) {
   document.getElementById('totalSpecialties').textContent = new Set(data.map(r=>r['Clinical Specialty']).filter(Boolean)).size;
 }
 
-function countBy(data, field) {
+function countBy(data, field, excludeBlanks) {
   const map = {};
-  data.forEach(r => { const k = r[field] || '(Not specified)'; map[k] = (map[k]||0)+1; });
+  data.forEach(r => {
+    const k = r[field];
+    if (excludeBlanks && (!k || k.toString().trim() === '')) return;
+    const label = (k && k.toString().trim() !== '') ? k : '(Not specified)';
+    map[label] = (map[label]||0)+1;
+  });
   return Object.entries(map).sort((a,b) => b[1]-a[1]);
 }
 
 function renderCharts(data) {
-  renderBar('chartDesignation', countBy(data,'Professional Designation'));
-  renderDoughnut('chartVendor', countBy(data,'Vendor'));
-  renderBar('chartSpecialty', countBy(data,'Clinical Specialty').slice(0,10));
+  renderDoughnut('chartDesignation', countBy(data,'Professional Designation', true));
+  renderDoughnut('chartSpecialty', countBy(data,'Clinical Specialty', true).slice(0,10));
+  renderBar('chartVendor', countBy(data,'Vendor', true));
   renderTimeline('chartTimeline', data);
 }
 
 function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
 
+function renderDoughnut(id, entries) {
+  destroyChart(id);
+  if (!entries.length) {
+    charts[id] = new Chart(document.getElementById(id), {
+      type:'doughnut', data:{labels:['No data'],datasets:[{data:[1],backgroundColor:['#e2e8f0']}]},
+      options:{responsive:true, plugins:{legend:{display:false}}}
+    });
+    return;
+  }
+  charts[id] = new Chart(document.getElementById(id), {
+    type:'doughnut',
+    data: {
+      labels: entries.map(e=>e[0]),
+      datasets: [{ data: entries.map(e=>e[1]), backgroundColor: entries.map((_,i)=>COLORS[i%COLORS.length]), borderWidth:2, borderColor:'#fff' }]
+    },
+    options: { responsive:true, cutout:'50%', plugins:{ legend:{ position:'right', labels:{boxWidth:12, padding:10, font:{size:11}} } } }
+  });
+}
+
 function renderBar(id, entries) {
   destroyChart(id);
+  if (!entries.length) {
+    charts[id] = new Chart(document.getElementById(id), {
+      type:'bar', data:{labels:['No data'],datasets:[{data:[0]}]},
+      options:{responsive:true, plugins:{legend:{display:false}}}
+    });
+    return;
+  }
   charts[id] = new Chart(document.getElementById(id), {
     type:'bar',
     data: {
@@ -294,21 +410,12 @@ function renderBar(id, entries) {
   });
 }
 
-function renderDoughnut(id, entries) {
-  destroyChart(id);
-  charts[id] = new Chart(document.getElementById(id), {
-    type:'doughnut',
-    data: {
-      labels: entries.map(e=>e[0]),
-      datasets: [{ data: entries.map(e=>e[1]), backgroundColor: entries.map((_,i)=>COLORS[i%COLORS.length]), borderWidth:2, borderColor:'#fff' }]
-    },
-    options: { responsive:true, cutout:'55%', plugins:{ legend:{ position:'right', labels:{boxWidth:14, padding:12, font:{size:12}} } } }
-  });
-}
-
 function renderTimeline(id, data) {
   destroyChart(id);
-  const dated = data.filter(r=>r['Account Created Date']);
+  var dated = data.filter(r => {
+    var d = r['Account Created Date'];
+    return d && d.toString().trim() !== '';
+  });
   if (!dated.length) {
     charts[id] = new Chart(document.getElementById(id), {
       type:'bar', data:{labels:['No date data'],datasets:[{data:[0]}]},
@@ -328,8 +435,8 @@ function renderTimeline(id, data) {
     data: {
       labels: sorted.map(e=>e[0]),
       datasets: [{ label:'Sign-Ups', data: sorted.map(e=>e[1]),
-        borderColor:COLORS[0], backgroundColor:'rgba(44,123,229,0.1)',
-        fill:true, tension:0.3, pointRadius:4, pointBackgroundColor:COLORS[0] }]
+        borderColor:COLORS[0], backgroundColor:'rgba(46,125,140,0.1)',
+        fill:true, tension:0.3, pointRadius:5, pointBackgroundColor:COLORS[0] }]
     },
     options: { responsive:true, plugins:{ legend:{display:false} },
       scales:{ y:{beginAtZero:true, ticks:{precision:0}}, x:{ticks:{font:{size:11}}} } }
@@ -337,13 +444,22 @@ function renderTimeline(id, data) {
 }
 
 function renderTable(data) {
-  document.getElementById('tableCount').textContent = 'Showing ' + data.length + ' of ' + RAW_DATA.length + ' records';
+  const total = RAW_DATA.length;
+  const shown = data.length;
+  document.getElementById('tableCount').textContent = 'Showing ' + shown + ' of ' + total + ' providers';
   const tb = document.getElementById('tableBody');
+  if (!data.length) {
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--muted);">No matching records found</td></tr>';
+    return;
+  }
   tb.innerHTML = data.map(r => {
-    const date = r['Account Created Date'] ? new Date(r['Account Created Date']).toLocaleDateString('en-CA') : '—';
-    return '<tr><td>'+esc(r['First Name']+' '+r['Last Name'])+'</td><td>'+esc(r['Health Authority Email'])+'</td><td>'
-      +esc(r['Professional Designation']||'—')+'</td><td>'+esc(r['Clinical Specialty']||'—')+'</td><td>'
-      +esc(r['Vendor']||'—')+'</td><td>'+date+'</td></tr>';
+    const desig = r['Professional Designation'];
+    const dateRaw = r['Account Created Date'];
+    const desigDisplay = (desig && desig.toString().trim() !== '') ? esc(desig) : '\u2014';
+    const date = (dateRaw && dateRaw.toString().trim() !== '') ? new Date(dateRaw).toLocaleDateString('en-CA') : '\u2014';
+    return '<tr><td>'+esc((r['First Name']||'')+' '+(r['Last Name']||''))+'</td><td>'+esc(r['Health Authority Email']||'\u2014')+'</td><td>'
+      +desigDisplay+'</td><td>'+esc(r['Clinical Specialty']||'\u2014')+'</td><td>'
+      +esc(r['Vendor']||'\u2014')+'</td><td>'+date+'</td></tr>';
   }).join('');
 }
 
@@ -355,6 +471,7 @@ function resetFilters() {
   document.getElementById('filterSpecialty').value='';
   document.getElementById('filterDateFrom').value='';
   document.getElementById('filterDateTo').value='';
+  document.getElementById('searchInput').value='';
   applyFilters();
 }
 

@@ -13,12 +13,12 @@ All notable changes to these dashboards are documented here.
 - Top 10 specialties displayed; footer shows "Top 10 of N specialties shown"
 - Doughnut chart retained for vendor breakdown (ideal for 2-3 items)
 
-### Changed — Logo integration: frosted glass pills
-- Logos displayed in original brand colors on semi-transparent frosted glass pills
-- `backdrop-filter: blur(8px)` for subtle glass effect against teal header
-- No rigid containers — pills auto-size to each logo's aspect ratio
+### Changed — Logo integration: white strip below header
+- Moved logos from inside teal header to a dedicated white strip below it
+- Original brand colors preserved — no filters, no containers, no pills
+- Logos centered with subtle dividers on clean white background
 - VCH logo cropped from 480×480 square to 480×250 wide (removed excess whitespace)
-- All logos now render at consistent 38px height with 16px horizontal padding
+- Solves contrast issues across all logo types (icons, text, SVG, PNG)
 
 ### Changed — Charts grid layout
 - Widened specialty column (1.4fr) and narrowed vendor column (0.6fr)

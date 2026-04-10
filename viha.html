@@ -49,14 +49,17 @@
   .header .subtitle { opacity:0.85; font-size:0.9rem; }
   .header .refresh-info { opacity:0.6; font-size:0.78rem; margin-top:0.5rem; position:relative; z-index:1; }
 
-  /* Logos row — frosted glass pills */
-  .logos-row { display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
-  .logos-row img {
-    height:38px; width:auto; object-fit:contain;
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    padding:6px 16px; border-radius:10px;
-    border: 1px solid rgba(255,255,255,0.3);
+  /* Logos strip below header */
+  .logos-strip {
+    display:flex; align-items:center; justify-content:center; gap:2.5rem;
+    padding:0.75rem 2.5rem; background:#fff;
+    border-bottom:1px solid var(--border);
+  }
+  .logos-strip img {
+    height:36px; width:auto; object-fit:contain;
+  }
+  .logos-strip .logo-divider {
+    width:1px; height:28px; background:var(--border);
   }
 
   /* Scorecard */
@@ -242,7 +245,8 @@
     .scorecard-row, .content { padding-left:1rem; padding-right:1rem; }
     .charts-grid { grid-template-columns:1fr; }
     .scorecard-row { grid-template-columns:1fr; }
-    .logos-row img { height:30px; padding:4px 10px; }
+    .logos-strip { gap:1.5rem; padding:0.6rem 1rem; }
+    .logos-strip img { height:28px; }
     .progress-label { width:150px; font-size:0.75rem; }
   }
 </style>
@@ -255,13 +259,15 @@
       <h1>BC Scribe Self-Pay Program Dashboard</h1>
       <div class="subtitle">VIHA &mdash; Island Health</div>
     </div>
-    <div class="logos-row">
-      <img src="logos/viha.svg" alt="VIHA Logo">
-      <img src="logos/phsa.png" alt="PHSA Logo">
-      <img src="logos/him.png" alt="HIM Logo">
-    </div>
   </div>
   <div class="refresh-info" id="refreshInfo">Loading data...</div>
+</div>
+<div class="logos-strip">
+  <img src="logos/viha.svg" alt="VIHA Logo">
+  <div class="logo-divider"></div>
+  <img src="logos/phsa.png" alt="PHSA Logo">
+  <div class="logo-divider"></div>
+  <img src="logos/him.png" alt="HIM Logo">
 </div>
 
 <div class="scorecard-row">

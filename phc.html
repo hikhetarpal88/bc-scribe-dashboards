@@ -61,17 +61,34 @@
 
   /* Scorecard */
   .scorecard-row {
-    display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
     gap:1.25rem; padding:1.5rem 2.5rem; margin-top:-1.25rem; position:relative; z-index:2;
   }
   .scorecard {
-    background: var(--card); border-radius:1rem; padding:1.25rem; text-align:center;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06); transition: transform 0.2s;
-    border-top: 3px solid var(--accent);
+    background: var(--card); border-radius:1rem; padding:1.5rem 1.25rem; text-align:center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06); transition: transform 0.25s, box-shadow 0.25s;
+    position: relative; overflow: hidden; border: 1px solid rgba(46,125,140,0.08);
   }
-  .scorecard:hover { transform: translateY(-2px); }
-  .scorecard .value { font-size:2.25rem; font-weight:800; color: var(--accent); }
-  .scorecard .label { font-size:0.8rem; color: var(--muted); margin-top:0.2rem; text-transform:uppercase; letter-spacing:0.5px; }
+  .scorecard::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  }
+  .scorecard::after {
+    content:''; position:absolute; top:0; right:0; width:80px; height:80px;
+    background: radial-gradient(circle at top right, rgba(46,125,140,0.06) 0%, transparent 70%);
+  }
+  .scorecard:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(46,125,140,0.12); }
+  .scorecard .icon { font-size:1.5rem; margin-bottom:0.25rem; }
+  .scorecard .value {
+    font-size:2.5rem; font-weight:800; letter-spacing:-1px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; line-height:1.1;
+  }
+  .scorecard .label {
+    font-size:0.72rem; color: var(--muted); margin-top:0.4rem;
+    text-transform:uppercase; letter-spacing:1px; font-weight:500;
+  }
 
   /* Data note */
   .data-note {
@@ -126,10 +143,15 @@
     gap:1.5rem; margin-bottom:1.5rem;
   }
   .chart-card {
-    background: var(--card); border-radius:1rem; padding:1.5rem;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    background: var(--card); border-radius:1rem; padding:1.75rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(46,125,140,0.06);
+    transition: box-shadow 0.25s;
   }
-  .chart-card h3 { font-size:0.95rem; font-weight:600; margin-bottom:1rem; color:var(--primary); }
+  .chart-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+  .chart-card h3 {
+    font-size:0.85rem; font-weight:600; margin-bottom:1.25rem; color:var(--muted);
+    text-transform:uppercase; letter-spacing:0.75px;
+  }
   .chart-wrapper { position:relative; width:100%; height:280px; }
 
   /* Provider Database Section */
@@ -208,9 +230,9 @@
 </div>
 
 <div class="scorecard-row">
-  <div class="scorecard"><div class="value" id="totalSignups">-</div><div class="label">Total Sign-Ups</div></div>
-  <div class="scorecard"><div class="value" id="totalVendors">-</div><div class="label">Vendors</div></div>
-  <div class="scorecard"><div class="value" id="totalSpecialties">-</div><div class="label">Specialties</div></div>
+  <div class="scorecard"><div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2E7D8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="value" id="totalSignups">-</div><div class="label">Total Sign-Ups</div></div>
+  <div class="scorecard"><div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2E7D8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><div class="value" id="totalVendors">-</div><div class="label">Vendors</div></div>
+  <div class="scorecard"><div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2E7D8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="value" id="totalSpecialties">-</div><div class="label">Specialties</div></div>
 </div>
 <div class="data-note">Providers who signed up on or after December 3, 2025</div>
 <div class="exec-summary" id="execSummary"></div>
@@ -267,7 +289,7 @@ const HA = 'PHC';
 const HA_FULL = 'Providence Health Care';
 const PROXY = 'https://script.google.com/macros/s/AKfycbw5mxQzV4m9nFrhHGDboWNx_MtBJOvMJ9725_wkfEg9TrrG2H9bd6dQYVCWSMGYlNZ7/exec';
 
-const COLORS = ['#2E7D8C','#3aadbe','#f5803e','#a855f7','#ec4899','#eab308','#14b8a6','#6366f1','#f43f5e','#84cc16','#06b6d4','#d946ef'];
+const COLORS = ['#2E7D8C','#48b5c4','#76d4e0','#1a5c6b','#a3d9e8','#f59e4f','#e8804a','#7c5cbf','#5a9e6f','#d4768c','#8ab4c4','#c4a35a'];
 
 let RAW_DATA = [];
 let charts = {};
@@ -413,6 +435,25 @@ function renderCharts(data) {
 
 function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
 
+const centerTextPlugin = {
+  id: 'centerText',
+  afterDraw(chart) {
+    if (chart.config.type !== 'doughnut') return;
+    const total = chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+    if (!total) return;
+    const {ctx, chartArea:{top,bottom,left,right}} = chart;
+    const cx = (left+right)/2, cy = (top+bottom)/2;
+    ctx.save();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='700 1.6rem "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle='#1a5c6b'; ctx.fillText(total, cx, cy-8);
+    ctx.font='500 0.65rem "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle='#6b7280'; ctx.fillText('TOTAL', cx, cy+12);
+    ctx.restore();
+  }
+};
+Chart.register(centerTextPlugin);
+
 function renderDoughnut(id, entries) {
   destroyChart(id);
   if (!entries.length) {
@@ -426,9 +467,23 @@ function renderDoughnut(id, entries) {
     type:'doughnut',
     data: {
       labels: entries.map(e=>e[0]),
-      datasets: [{ data: entries.map(e=>e[1]), backgroundColor: entries.map((_,i)=>COLORS[i%COLORS.length]), borderWidth:2, borderColor:'#fff' }]
+      datasets: [{
+        data: entries.map(e=>e[1]),
+        backgroundColor: entries.map((_,i)=>COLORS[i%COLORS.length]),
+        borderWidth:3, borderColor:'#fff',
+        hoverBorderWidth:0, hoverOffset:6
+      }]
     },
-    options: { responsive:true, maintainAspectRatio:false, cutout:'50%', plugins:{ legend:{ position:'right', labels:{boxWidth:12, padding:10, font:{size:11}} } } }
+    options: {
+      responsive:true, maintainAspectRatio:false, cutout:'65%',
+      animation:{ animateRotate:true, duration:800, easing:'easeOutQuart' },
+      plugins:{
+        legend:{ position:'right', labels:{boxWidth:10, padding:8, font:{size:11, weight:'500'}, usePointStyle:true, pointStyle:'circle'} },
+        tooltip:{ backgroundColor:'rgba(26,92,107,0.92)', titleFont:{size:12,weight:'600'}, bodyFont:{size:11}, padding:10, cornerRadius:8,
+          callbacks:{ label: function(ctx){ const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ' '+ctx.label+': '+ctx.raw+' ('+Math.round(ctx.raw/t*100)+'%)'; } }
+        }
+      }
+    }
   });
 }
 
@@ -441,14 +496,34 @@ function renderBar(id, entries) {
     });
     return;
   }
-  charts[id] = new Chart(document.getElementById(id), {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createLinearGradient(0,0,canvas.width,0);
+  gradient.addColorStop(0,'#1a5c6b'); gradient.addColorStop(1,'#48b5c4');
+  charts[id] = new Chart(canvas, {
     type:'bar',
     data: {
       labels: entries.map(e=>e[0]),
-      datasets: [{ data: entries.map(e=>e[1]), backgroundColor: entries.map((_,i)=>COLORS[i%COLORS.length]), borderRadius:6, maxBarThickness:48 }]
+      datasets: [{
+        data: entries.map(e=>e[1]),
+        backgroundColor: gradient, borderRadius:8, maxBarThickness:36,
+        borderSkipped:false
+      }]
     },
-    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
-      scales:{ x:{ beginAtZero:true, ticks:{precision:0} }, y:{ ticks:{font:{size:12}} } } }
+    options: {
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      animation:{ duration:800, easing:'easeOutQuart' },
+      plugins:{
+        legend:{display:false},
+        tooltip:{ backgroundColor:'rgba(26,92,107,0.92)', titleFont:{size:12,weight:'600'}, bodyFont:{size:11}, padding:10, cornerRadius:8 }
+      },
+      scales:{
+        x:{ beginAtZero:true, ticks:{precision:0, font:{size:11}, color:'#9ca3af'},
+          grid:{color:'rgba(0,0,0,0.04)', drawBorder:false} },
+        y:{ ticks:{font:{size:12, weight:'500'}, color:'#374151', padding:8},
+          grid:{display:false} }
+      }
+    }
   });
 }
 

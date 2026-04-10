@@ -455,25 +455,6 @@ function renderCharts(data) {
 
 function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
 
-const centerTextPlugin = {
-  id: 'centerText',
-  afterDraw(chart) {
-    if (chart.config.type !== 'doughnut') return;
-    const total = chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
-    if (!total) return;
-    const {ctx, chartArea:{top,bottom,left,right}} = chart;
-    const cx = (left+right)/2, cy = (top+bottom)/2;
-    ctx.save();
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.font='700 1.6rem "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle='#1a5c6b'; ctx.fillText(total, cx, cy-8);
-    ctx.font='500 0.65rem "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle='#6b7280'; ctx.fillText('TOTAL', cx, cy+12);
-    ctx.restore();
-  }
-};
-Chart.register(centerTextPlugin);
-
 function renderDoughnut(id, entries) {
   destroyChart(id);
   if (!entries.length) {

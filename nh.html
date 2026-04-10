@@ -316,6 +316,117 @@ let RAW_DATA = [];
 let charts = {};
 const CACHE_KEY = 'scribe_cache_' + HA;
 
+const SPECIALTY_MAP = {
+  'emergency medicine doctor': 'Emergency Medicine',
+  'emergency medicine specialist': 'Emergency Medicine',
+  'family medicine specialist': 'Family Medicine',
+  'geriatric medicine specialist': 'Geriatrics',
+  'geriatrician': 'Geriatrics',
+  'internal medicine specialist': 'Internal Medicine',
+  'obstetrics & gynecology (obgyn)': 'Obstetrics & Gynaecology',
+  'obgyn': 'Obstetrics & Gynaecology',
+  'obstetrician & gynaecologist': 'Obstetrics & Gynaecology',
+  'otorhinolaryngologist (ent specialist)': 'Otolaryngology (ENT)',
+  'otolaryngologist': 'Otolaryngology (ENT)',
+  'otolaryngology': 'Otolaryngology (ENT)',
+  'otolaryngology (ent)': 'Otolaryngology (ENT)',
+  'orthopaedic surgeon': 'Orthopaedic Surgery',
+  'orthopaedics': 'Orthopaedic Surgery',
+  'orthopedics': 'Orthopaedic Surgery',
+  'psychiatry': 'Psychiatrist',
+  'urology': 'Urologist',
+  'physical medicine and rehabilitation': 'Physical Medicine & Rehabilitation',
+  'physical medicine and rehabilitation specialist': 'Physical Medicine & Rehabilitation',
+  'haematologist': 'Haematology',
+  'hematology': 'Haematology',
+  'infectious disease': 'Infectious Diseases',
+  'infectious diseases physician': 'Infectious Diseases',
+  'endocrinologist': 'Endocrinology',
+  'gastroenterologist': 'Gastroenterology',
+  'pulmonologist': 'Respiratory Medicine',
+  'respiratory physician': 'Respiratory Medicine',
+  'respirologist': 'Respiratory Medicine',
+  'respirology': 'Respiratory Medicine',
+  'rheumatologist': 'Rheumatology',
+  'palliative care physician': 'Palliative Care',
+  'palliative medicine': 'Palliative Care',
+  'general surgeon': 'General Surgery',
+  'surgeon': 'General Surgery',
+  'oncologist': 'Oncology',
+  'medical oncologist': 'Oncology',
+  'radiation oncologist': 'Radiation Oncology',
+  'radiation oncology': 'Radiation Oncology',
+  'ophthalmologist': 'Ophthalmology',
+  'ophthalmology': 'Ophthalmology',
+  'plastic & reconstructive surgeon': 'Plastic Surgery',
+  'plastic surgery': 'Plastic Surgery',
+  'addiction medicine specialist': 'Addiction Medicine',
+  'addiction medicine': 'Addiction Medicine',
+  'pain management specialist': 'Pain Management',
+  'chronic pain specialist': 'Pain Management',
+  'paediatrician': 'Paediatrics',
+  'pediatrician': 'Paediatrics',
+  'pediatrics': 'Paediatrics',
+  'general practitioner': 'Family Medicine',
+  'nephrologist': 'Nephrology',
+  'neurologist': 'Neurology',
+  'dermatologist': 'Dermatology',
+  'radiologist': 'Radiology',
+  'interventional radiologist': 'Interventional Radiology',
+  'hip and knee surgeon': 'Orthopaedic Surgery',
+  'spine surgeon': 'Spine Surgery',
+  'hepatobiliary surgeon': 'Hepatobiliary Surgery',
+  'vascular surgeon': 'Vascular Surgery',
+  'gynaecologist': 'Gynaecology',
+  'gynaecological oncologist': 'Gynaecological Oncology',
+  'hospitalist': 'Hospital Medicine',
+  'psychogeriatrician': 'Psychogeriatrics',
+  'neuropsychiatrist': 'Neuropsychiatry',
+  'acute medicine specialist': 'Acute Medicine',
+  'sports medicine specialist': 'Sports Medicine',
+  'urgent care clinician': 'Urgent Care',
+  'critical care medicine specialist': 'Critical Care',
+  'forensic psychiatrist': 'Forensic Psychiatry',
+  'forensic medicine specialist': 'Forensic Medicine',
+  'clinical geneticist': 'Clinical Genetics',
+  'medical geneticist': 'Medical Genetics',
+  'clinical immunologist': 'Clinical Immunology',
+  'allergy and immunologist': 'Allergy & Immunology',
+  'child and adolescent psychiatrist': 'Child & Adolescent Psychiatry',
+  'developmental paediatrician': 'Developmental Paediatrics',
+  'general paediatrician': 'Paediatrics',
+  'paediatric emergency medicine specialist': 'Paediatric Emergency Medicine',
+  'paediatric endocrinologist': 'Paediatric Endocrinology',
+  'paediatric gastroenterologist': 'Paediatric Gastroenterology',
+  'paediatric nephrologist': 'Paediatric Nephrology',
+  'paediatric neurologist': 'Paediatric Neurology',
+  'paediatric oncologist': 'Paediatric Oncology',
+  'paediatric respirologist': 'Paediatric Respirology',
+  'paediatric rheumatologist': 'Paediatric Rheumatology',
+  'adolescent and young adult medicine specialist': 'Adolescent Medicine',
+  'hepatologist': 'Hepatology',
+  'general surgery': 'General Surgery',
+  'geriatrics': 'Geriatrics',
+  'internal medicine': 'Internal Medicine',
+  'cardiologist': 'Cardiology',
+};
+
+function normalizeSpecialty(spec) {
+  if (!spec) return spec;
+  const clean = spec.replace(/[\u00A0\u200B\u200C\u200D\uFEFF]/g,' ').replace(/\s+/g,' ').trim();
+  const key = clean.toLowerCase();
+  return SPECIALTY_MAP[key] || clean;
+}
+
+function cleanData(rows) {
+  return rows.map(r => {
+    if (r['Clinical Specialty']) {
+      r['Clinical Specialty'] = normalizeSpecialty(r['Clinical Specialty']);
+    }
+    return r;
+  });
+}
+
 function dedup(rows) {
   const seen = new Set();
   return rows.filter(r => {
@@ -328,7 +439,7 @@ function dedup(rows) {
 }
 
 function renderData(json, source) {
-  RAW_DATA = dedup(json.data || []);
+  RAW_DATA = dedup(cleanData(json.data || []));
   const ts = new Date(json.timestamp).toLocaleString();
   document.getElementById('refreshInfo').textContent =
     'Last refreshed: ' + ts + ' \u2014 ' + RAW_DATA.length + ' providers' + (source === 'cache' ? ' (updating\u2026)' : '');

@@ -4,6 +4,17 @@ All notable changes to these dashboards are documented here.
 
 ---
 
+## 2026-04-09 — v3.1 Specialty Data Normalization (all 7 dashboards)
+
+### Added — Real-time specialty normalization
+- 80+ specialty variant mappings applied client-side on every data load
+- Normalizes person-titles to field-names (e.g., "Gastroenterologist" → "Gastroenterology")
+- Merges duplicates: Emergency Medicine (3 variants), Family Medicine (2), Geriatrics (3), OB/GYN (3), ENT (4), Orthopaedics (3), Respiratory (4), etc.
+- Strips hidden unicode characters (non-breaking spaces, zero-width chars) before matching
+- PHC: 23 → 17 specialties | PHSA: 52 → 43 | FHA: 49 → 32
+
+---
+
 ## 2026-04-09 — v3 Vibrant Premium Redesign (all 7 dashboards)
 
 ### Changed — Visual overhaul

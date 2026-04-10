@@ -49,19 +49,6 @@
   .header .subtitle { opacity:0.85; font-size:0.9rem; }
   .header .refresh-info { opacity:0.6; font-size:0.78rem; margin-top:0.5rem; position:relative; z-index:1; }
 
-  /* Logos strip below header */
-  .logos-strip {
-    display:flex; align-items:center; justify-content:center; gap:2.5rem;
-    padding:0.75rem 2.5rem; background:#fff;
-    border-bottom:1px solid var(--border);
-  }
-  .logos-strip img {
-    height:36px; width:auto; object-fit:contain;
-  }
-  .logos-strip .logo-divider {
-    width:1px; height:28px; background:var(--border);
-  }
-
   /* Scorecard */
   .scorecard-row {
     display:grid; grid-template-columns: repeat(3, 1fr);
@@ -237,16 +224,51 @@
   @keyframes spin { to { transform:rotate(360deg); } }
   .error { color:#dc2626; text-align:center; padding:2rem; }
 
-  /* Footer */
-  .footer { text-align:center; padding:1.25rem; color:var(--muted); font-size:0.78rem; border-top:1px solid var(--border); margin-top:1rem; }
+  /* Footer — partner logos */
+  .footer {
+    border-top:1px solid var(--border); padding:1.75rem 2.5rem 1.5rem;
+    text-align:center; margin-top:1.5rem;
+  }
+  .footer .footer-title {
+    font-size:0.75rem; font-weight:600; color:var(--primary);
+    text-transform:uppercase; letter-spacing:1.2px; margin-bottom:1.25rem;
+  }
+  .footer .ha-logos {
+    display:flex; align-items:center; justify-content:center; gap:0;
+    flex-wrap:wrap; margin-bottom:1.25rem;
+  }
+  .footer .ha-logos .logo-cell {
+    width:130px; height:48px;
+    display:flex; align-items:center; justify-content:center;
+    padding:0.35rem 0.4rem;
+  }
+  .footer .ha-logos .logo-cell img {
+    max-height:32px; max-width:120px; width:auto; height:auto;
+    object-fit:contain;
+  }
+  .footer .program-line {
+    display:flex; align-items:center; justify-content:center; gap:1.25rem;
+    padding-top:1rem; border-top:1px solid var(--border);
+  }
+  .footer .program-line .presented {
+    font-size:0.7rem; color:var(--muted); font-style:italic;
+  }
+  .footer .program-line img {
+    max-height:26px; max-width:120px; width:auto; height:auto;
+    object-fit:contain; opacity:0.65;
+  }
+  .footer .fine-print {
+    font-size:0.72rem; color:var(--muted); margin-top:1rem;
+  }
 
   @media (max-width:768px) {
     .header { padding:1.25rem; }
     .scorecard-row, .content { padding-left:1rem; padding-right:1rem; }
     .charts-grid { grid-template-columns:1fr; }
     .scorecard-row { grid-template-columns:1fr; }
-    .logos-strip { gap:1.5rem; padding:0.6rem 1rem; }
-    .logos-strip img { height:28px; }
+    .footer { padding:1.25rem 1rem; }
+    .footer .ha-logos .logo-cell { width:120px; height:45px; }
+    .footer .ha-logos .logo-cell img { max-height:26px; max-width:100px; }
     .progress-label { width:150px; font-size:0.75rem; }
   }
 </style>
@@ -261,13 +283,6 @@
     </div>
   </div>
   <div class="refresh-info" id="refreshInfo">Loading data...</div>
-</div>
-<div class="logos-strip">
-  <img src="logos/nh.png" alt="NH Logo">
-  <div class="logo-divider"></div>
-  <img src="logos/phsa.png" alt="PHSA Logo">
-  <div class="logo-divider"></div>
-  <img src="logos/him.png" alt="HIM Logo">
 </div>
 
 <div class="scorecard-row">
@@ -335,7 +350,21 @@
 </div>
 
 <div class="footer">
-  BC Health &mdash; AI Scribe Self-Pay Dashboard &bull; Data refreshes automatically from master sheet
+  <div class="footer-title">BC Health Authority Partners</div>
+  <div class="ha-logos">
+    <div class="logo-cell"><img src="logos/phc.png" alt="PHC"></div>
+    <div class="logo-cell"><img src="logos/vch.png" alt="VCH"></div>
+    <div class="logo-cell"><img src="logos/fha.svg" alt="FHA"></div>
+    <div class="logo-cell"><img src="logos/viha.svg" alt="VIHA"></div>
+    <div class="logo-cell"><img src="logos/ih.png" alt="IH"></div>
+    <div class="logo-cell"><img src="logos/nh.png" alt="NH"></div>
+  </div>
+  <div class="program-line">
+    <span class="presented">Presented by</span>
+    <img src="logos/phsa.png" alt="PHSA">
+    <img src="logos/him.png" alt="HIM">
+  </div>
+  <div class="fine-print">Data refreshes automatically from master sheet</div>
 </div>
 
 <script>

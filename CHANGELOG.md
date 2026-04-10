@@ -4,6 +4,25 @@ All notable changes to these dashboards are documented here.
 
 ---
 
+## 2026-04-09 — v4.2 Footer Logo Strip (all 7 dashboards)
+
+### Changed — Logos moved from header to footer
+- Removed logo strip from below header — header is now clean title only
+- Added "Variation A" footer with all 6 HA logos (PHC, VCH, FHA, VIHA, IH, NH) + "Presented by" PHSA/HIM
+- Footer is identical across all 7 dashboards for consistency
+- All HA logos displayed in uniform 130×48px cells with max-height:32px constraint
+
+### Fixed — VCH logo aspect ratio
+- Cropped VCH logo from 480×250 (1.9:1) to 480×130 (3.7:1) by removing whitespace
+- VCH now renders at comparable visual weight to other horizontal logos
+- Previously appeared tiny because near-square aspect ratio at constrained height
+
+### Changed — Regeneration script simplified
+- Footer logos are hardcoded (same for all dashboards) — no logo path substitution needed
+- sed only replaces: title, API ha= param, subtitle, HA const, HA_FULL const
+
+---
+
 ## 2026-04-09 — v4 Progress Bars + Logo Containers (all 7 dashboards)
 
 ### Changed — Specialty chart: doughnut → progress bars

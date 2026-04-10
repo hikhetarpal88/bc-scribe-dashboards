@@ -8,17 +8,17 @@ Seven separate read-only dashboards for tracking AI Scribe Self-Pay sign-ups acr
 
 ## Health Authorities & Dashboard Files
 
-| HA Code | Full Name | File | Logos |
-|---------|-----------|------|-------|
-| PHSA | Provincial Health Services Authority | `phsa.html` | PHSA + HIM |
-| PHC | Providence Health Care | `phc.html` | PHC + PHSA + HIM |
-| VCH | Vancouver Coastal Health | `vch.html` | VCH + PHSA + HIM |
-| FHA | Fraser Health Authority | `fha.html` | FHA + PHSA + HIM |
-| VIHA | Island Health | `viha.html` | VIHA + PHSA + HIM |
-| IH | Interior Health | `ih.html` | IH + PHSA + HIM |
-| NH | Northern Health | `nh.html` | NH + PHSA + HIM |
+| HA Code | Full Name | File |
+|---------|-----------|------|
+| PHSA | Provincial Health Services Authority | `phsa.html` |
+| PHC | Providence Health Care | `phc.html` |
+| VCH | Vancouver Coastal Health | `vch.html` |
+| FHA | Fraser Health Authority | `fha.html` |
+| VIHA | Island Health | `viha.html` |
+| IH | Interior Health | `ih.html` |
+| NH | Northern Health | `nh.html` |
 
-**Note:** PHSA dashboard shows only 2 logos (PHSA + HIM). All others show 3 (HA-specific + PHSA + HIM).
+**Note:** All 7 dashboards share an identical footer showing all 6 HA logos + "Presented by" PHSA/HIM.
 
 ---
 
@@ -138,7 +138,7 @@ The Google Sheet ID never leaves Google's servers. Each HA only ever receives it
 
 - **Color scheme:** Teal/blue — `--primary: #1a5c6b`, `--accent: #2E7D8C`, `--accent-light: #3a9aad`
 - **Header:** Gradient teal background with white text
-- **Logos:** Displayed on white pill backgrounds (`background: rgba(255,255,255,0.95); padding: 6px 12px; border-radius: 8px;`) with dividers between them
+- **Footer:** All 6 HA logos in uniform cells (130×48px, max-height:32px) + "Presented by" PHSA/HIM — identical across all dashboards
 - **Cards:** White with `border-radius: 1rem`, subtle box shadows
 - **Responsive:** Adapts to mobile (single-column charts below 768px)
 
@@ -155,7 +155,7 @@ dashboards/
 ├── viha.html               # VIHA dashboard
 ├── ih.html                 # IH dashboard
 ├── nh.html                 # NH dashboard
-├── phsa.html               # PHSA dashboard (2 logos only)
+├── phsa.html               # PHSA dashboard
 ├── apps-script-proxy.js    # Local reference of Apps Script code
 ├── DOCUMENTATION.md        # This file
 └── logos/
@@ -177,42 +177,18 @@ dashboards/
 `phc.html` is the **master template**. To make changes across all dashboards:
 
 1. Edit `phc.html`
-2. Regenerate all 6 variants using `sed` substitutions:
+2. Regenerate all 6 variants using `sed` substitutions (footer logos are identical — no logo path changes needed):
    ```bash
    # Example for VCH:
    sed \
-     -e "s/const HA = 'PHC'/const HA = 'VCH'/g" \
-     -e "s/const HA_FULL = 'Providence Health Care'/const HA_FULL = 'Vancouver Coastal Health'/g" \
-     -e "s/<title>PHC/<title>VCH/g" \
-     -e "s/PHC \&mdash; Providence Health Care/VCH \&mdash; Vancouver Coastal Health/g" \
-     -e "s|logos/phc.png|logos/vch.png|g" \
-     -e "s|alt=\"PHC Logo\"|alt=\"VCH Logo\"|g" \
-     -e "s|?ha=PHC|?ha=VCH|g" \
+     -e "s|<title>PHC|<title>VCH|" \
+     -e "s|exec?ha=PHC|exec?ha=VCH|" \
+     -e "s|PHC \&mdash; Providence Health Care|VCH \&mdash; Vancouver Coastal Health|" \
+     -e "s|const HA = 'PHC'|const HA = 'VCH'|" \
+     -e "s|const HA_FULL = 'Providence Health Care'|const HA_FULL = 'Vancouver Coastal Health'|" \
      phc.html > vch.html
    ```
-3. For PHSA, additionally remove the duplicate HA logo (keep only PHSA + HIM):
-   ```python
-   python3 -c "
-   with open('phsa.html','r') as f:
-       content = f.read()
-   # Remove HA logo + first divider, keeping only PHSA + HIM
-   old = '''    <div class=\"logos-row\">
-         <img src=\"logos/phsa.png\" alt=\"PHSA Logo\">
-         <div class=\"logo-divider\"></div>
-         <img src=\"logos/phsa.png\" alt=\"PHSA Logo\">
-         <div class=\"logo-divider\"></div>
-         <img src=\"logos/him.png\" alt=\"HIM Logo\">
-       </div>'''
-   new = '''    <div class=\"logos-row\">
-         <img src=\"logos/phsa.png\" alt=\"PHSA Logo\">
-         <div class=\"logo-divider\"></div>
-         <img src=\"logos/him.png\" alt=\"HIM Logo\">
-       </div>'''
-   content = content.replace(old, new)
-   with open('phsa.html','w') as f:
-       f.write(content)
-   "
-   ```
+3. Repeat for FHA, VIHA, IH, NH, PHSA with their respective names
 4. Commit and push to `main` — GitHub Pages auto-deploys
 
 ### HA Code → Full Name Mapping

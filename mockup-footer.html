@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOCKUP — Footer Logo Variations</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f0f5f7; color:#1a1a2e; }
+
+  :root {
+    --primary: #1a5c6b;
+    --accent: #2E7D8C;
+    --accent-light: #3a9aad;
+    --muted: #6b7280;
+    --border: #e2ebee;
+  }
+
+  .mockup-banner {
+    background: linear-gradient(135deg, #f59e4f, #e85d75);
+    color:#fff; text-align:center; padding:0.6rem; font-size:0.85rem; font-weight:600;
+  }
+
+  .section-label {
+    max-width:1100px; margin:2.5rem auto 1rem; padding:0 1.5rem;
+    font-size:0.85rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;
+    color: var(--accent); display:flex; align-items:center; gap:0.75rem;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .variation {
+    max-width:1100px; margin:0 auto 2rem; padding:0 1.5rem;
+  }
+  .variation-card {
+    background:#fff; border-radius:1rem; overflow:hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.06);
+  }
+  .variation-label {
+    padding:1rem 1.5rem 0.5rem;
+    font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.75px;
+    color:var(--muted); display:flex; align-items:center; gap:0.5rem;
+  }
+  .badge { font-size:0.65rem; padding:0.15rem 0.5rem; border-radius:1rem; font-weight:700; }
+  .badge-a { background:#dbeafe; color:#2563eb; }
+  .badge-b { background:#fce7f3; color:#db2777; }
+  .badge-c { background:#d1fae5; color:#059669; }
+  .badge-d { background:#fef3c7; color:#d97706; }
+
+  /* ===== HEADER PREVIEW (same for all — no logos) ===== */
+  .header-preview {
+    background: linear-gradient(135deg, #1a5c6b 0%, #2E7D8C 50%, #3a9aad 100%);
+    color:#fff; padding:1.25rem 1.5rem; position:relative;
+  }
+  .header-preview h2 { font-size:1.1rem; font-weight:700; }
+  .header-preview .sub { font-size:0.8rem; opacity:0.85; margin-top:0.15rem; }
+  .header-preview .refresh { font-size:0.72rem; opacity:0.5; margin-top:0.35rem; }
+
+  /* Fake content placeholder */
+  .content-placeholder {
+    padding:1.5rem; display:flex; gap:1rem; justify-content:center;
+  }
+  .fake-card {
+    background:#f8fafc; border-radius:0.75rem; padding:1rem 1.5rem; text-align:center;
+    border:1px solid var(--border); flex:1; max-width:160px;
+  }
+  .fake-card .num { font-size:1.8rem; font-weight:800; color:var(--primary); }
+  .fake-card .lbl { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.75px; margin-top:0.2rem; }
+
+  /* ===== VARIATION A: Centered logos + "Presented by" ===== */
+  .footer-a {
+    border-top:1px solid var(--border); padding:1.5rem 2rem;
+    text-align:center;
+  }
+  .footer-a .program-name {
+    font-size:0.78rem; font-weight:600; color:var(--primary);
+    text-transform:uppercase; letter-spacing:1px; margin-bottom:1rem;
+  }
+  .footer-a .ha-logos {
+    display:flex; align-items:center; justify-content:center; gap:2rem;
+    flex-wrap:wrap; margin-bottom:1rem;
+  }
+  .footer-a .ha-logos img { height:32px; width:auto; object-fit:contain; }
+  .footer-a .program-logos {
+    display:flex; align-items:center; justify-content:center; gap:1.5rem;
+    padding-top:0.75rem; border-top:1px solid var(--border);
+  }
+  .footer-a .program-logos img { height:28px; width:auto; object-fit:contain; opacity:0.7; }
+  .footer-a .program-logos .presented {
+    font-size:0.7rem; color:var(--muted); font-style:italic;
+  }
+  .footer-a .fine-print {
+    font-size:0.72rem; color:var(--muted); margin-top:0.75rem;
+  }
+
+  /* ===== VARIATION B: Minimal single row ===== */
+  .footer-b {
+    border-top:1px solid var(--border); padding:1.25rem 2rem;
+    display:flex; align-items:center; justify-content:center; gap:1.75rem;
+    flex-wrap:wrap;
+  }
+  .footer-b img { height:28px; width:auto; object-fit:contain; opacity:0.6; }
+  .footer-b img:hover { opacity:1; }
+  .footer-b .sep { width:1px; height:24px; background:var(--border); }
+  .footer-b .text { font-size:0.72rem; color:var(--muted); }
+
+  /* ===== VARIATION C: Gradient footer with white logos ===== */
+  .footer-c {
+    background: linear-gradient(135deg, #1a5c6b 0%, #2E7D8C 50%, #3a9aad 100%);
+    padding:1.5rem 2rem; text-align:center;
+  }
+  .footer-c .title {
+    font-size:0.75rem; font-weight:600; color:rgba(255,255,255,0.7);
+    text-transform:uppercase; letter-spacing:1.5px; margin-bottom:1rem;
+  }
+  .footer-c .logos {
+    display:flex; align-items:center; justify-content:center; gap:2rem; flex-wrap:wrap;
+    margin-bottom:0.75rem;
+  }
+  .footer-c .logos img {
+    height:30px; width:auto; object-fit:contain;
+    filter: brightness(0) invert(1); opacity:0.75;
+  }
+  .footer-c .divider {
+    width:100%; max-width:500px; height:1px; background:rgba(255,255,255,0.15); margin:0.5rem auto;
+  }
+  .footer-c .bottom-row {
+    display:flex; align-items:center; justify-content:center; gap:1.5rem;
+    margin-top:0.5rem;
+  }
+  .footer-c .bottom-row img {
+    height:24px; width:auto; object-fit:contain;
+    filter: brightness(0) invert(1); opacity:0.5;
+  }
+  .footer-c .fine-print {
+    font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:0.75rem;
+  }
+
+  /* ===== VARIATION D: Card-style footer with logo grid ===== */
+  .footer-d {
+    border-top:1px solid var(--border); padding:1.5rem 2rem; text-align:center;
+  }
+  .footer-d .title {
+    font-size:0.78rem; font-weight:600; color:var(--primary);
+    margin-bottom:1.25rem;
+  }
+  .footer-d .logo-grid {
+    display:flex; align-items:center; justify-content:center; gap:0;
+    flex-wrap:wrap; max-width:700px; margin:0 auto;
+  }
+  .footer-d .logo-cell {
+    padding:0.75rem 1.25rem;
+    border:1px solid #f0f4f5;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .footer-d .logo-cell img { height:30px; width:auto; object-fit:contain; }
+  .footer-d .program-row {
+    display:flex; align-items:center; justify-content:center; gap:2rem;
+    margin-top:1rem;
+  }
+  .footer-d .program-row img { height:26px; width:auto; object-fit:contain; opacity:0.6; }
+  .footer-d .fine-print {
+    font-size:0.72rem; color:var(--muted); margin-top:0.75rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-banner">FOOTER MOCKUP — 4 Variations (not live)</div>
+
+<!-- ===== VARIATION A ===== -->
+<div class="section-label">Variation A — Centered with "Presented by"</div>
+<div class="variation">
+  <div class="variation-card">
+    <div class="variation-label"><span class="badge badge-a">A</span> Structured: HA logos top, program logos bottom</div>
+    <div class="header-preview">
+      <h2>BC Scribe Self-Pay Program Dashboard</h2>
+      <div class="sub">PHC — Providence Health Care</div>
+      <div class="refresh">Last refreshed: 4/9/2026 — 47 providers</div>
+    </div>
+    <div class="content-placeholder">
+      <div class="fake-card"><div class="num">47</div><div class="lbl">Sign-Ups</div></div>
+      <div class="fake-card"><div class="num">2</div><div class="lbl">Vendors</div></div>
+      <div class="fake-card"><div class="num">17</div><div class="lbl">Specialties</div></div>
+    </div>
+    <div class="footer-a">
+      <div class="program-name">BC Health Authority Partners</div>
+      <div class="ha-logos">
+        <img src="logos/phc.png" alt="PHC">
+        <img src="logos/vch.png" alt="VCH">
+        <img src="logos/fha.svg" alt="FHA">
+        <img src="logos/viha.svg" alt="VIHA">
+        <img src="logos/ih.png" alt="IH">
+        <img src="logos/nh.png" alt="NH">
+      </div>
+      <div class="program-logos">
+        <span class="presented">Presented by</span>
+        <img src="logos/phsa.png" alt="PHSA">
+        <img src="logos/him.png" alt="HIM">
+      </div>
+      <div class="fine-print">Data refreshes automatically from master sheet</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VARIATION B ===== -->
+<div class="section-label">Variation B — Minimal single row</div>
+<div class="variation">
+  <div class="variation-card">
+    <div class="variation-label"><span class="badge badge-b">B</span> All logos in one row, muted, no hierarchy</div>
+    <div class="header-preview">
+      <h2>BC Scribe Self-Pay Program Dashboard</h2>
+      <div class="sub">PHC — Providence Health Care</div>
+      <div class="refresh">Last refreshed: 4/9/2026 — 47 providers</div>
+    </div>
+    <div class="content-placeholder">
+      <div class="fake-card"><div class="num">47</div><div class="lbl">Sign-Ups</div></div>
+      <div class="fake-card"><div class="num">2</div><div class="lbl">Vendors</div></div>
+      <div class="fake-card"><div class="num">17</div><div class="lbl">Specialties</div></div>
+    </div>
+    <div class="footer-b">
+      <img src="logos/phsa.png" alt="PHSA">
+      <img src="logos/him.png" alt="HIM">
+      <div class="sep"></div>
+      <img src="logos/phc.png" alt="PHC">
+      <img src="logos/vch.png" alt="VCH">
+      <img src="logos/fha.svg" alt="FHA">
+      <img src="logos/viha.svg" alt="VIHA">
+      <img src="logos/ih.png" alt="IH">
+      <img src="logos/nh.png" alt="NH">
+    </div>
+  </div>
+</div>
+
+<!-- ===== VARIATION C ===== -->
+<div class="section-label">Variation C — Teal gradient footer (mirrors header)</div>
+<div class="variation">
+  <div class="variation-card">
+    <div class="variation-label"><span class="badge badge-c">C</span> White monochrome logos on teal — bookend effect</div>
+    <div class="header-preview">
+      <h2>BC Scribe Self-Pay Program Dashboard</h2>
+      <div class="sub">PHC — Providence Health Care</div>
+      <div class="refresh">Last refreshed: 4/9/2026 — 47 providers</div>
+    </div>
+    <div class="content-placeholder">
+      <div class="fake-card"><div class="num">47</div><div class="lbl">Sign-Ups</div></div>
+      <div class="fake-card"><div class="num">2</div><div class="lbl">Vendors</div></div>
+      <div class="fake-card"><div class="num">17</div><div class="lbl">Specialties</div></div>
+    </div>
+    <div class="footer-c">
+      <div class="title">BC Health Authority Partners</div>
+      <div class="logos">
+        <img src="logos/phc.png" alt="PHC">
+        <img src="logos/vch.png" alt="VCH">
+        <img src="logos/fha.svg" alt="FHA">
+        <img src="logos/viha.svg" alt="VIHA">
+        <img src="logos/ih.png" alt="IH">
+        <img src="logos/nh.png" alt="NH">
+      </div>
+      <div class="divider"></div>
+      <div class="bottom-row">
+        <img src="logos/phsa.png" alt="PHSA">
+        <img src="logos/him.png" alt="HIM">
+      </div>
+      <div class="fine-print">Data refreshes automatically from master sheet</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VARIATION D ===== -->
+<div class="section-label">Variation D — Grid cells with borders</div>
+<div class="variation">
+  <div class="variation-card">
+    <div class="variation-label"><span class="badge badge-d">D</span> Each logo in its own bordered cell — structured, formal</div>
+    <div class="header-preview">
+      <h2>BC Scribe Self-Pay Program Dashboard</h2>
+      <div class="sub">PHC — Providence Health Care</div>
+      <div class="refresh">Last refreshed: 4/9/2026 — 47 providers</div>
+    </div>
+    <div class="content-placeholder">
+      <div class="fake-card"><div class="num">47</div><div class="lbl">Sign-Ups</div></div>
+      <div class="fake-card"><div class="num">2</div><div class="lbl">Vendors</div></div>
+      <div class="fake-card"><div class="num">17</div><div class="lbl">Specialties</div></div>
+    </div>
+    <div class="footer-d">
+      <div class="title">BC Scribe Self-Pay Program Partners</div>
+      <div class="logo-grid">
+        <div class="logo-cell"><img src="logos/phc.png" alt="PHC"></div>
+        <div class="logo-cell"><img src="logos/vch.png" alt="VCH"></div>
+        <div class="logo-cell"><img src="logos/fha.svg" alt="FHA"></div>
+        <div class="logo-cell"><img src="logos/viha.svg" alt="VIHA"></div>
+        <div class="logo-cell"><img src="logos/ih.png" alt="IH"></div>
+        <div class="logo-cell"><img src="logos/nh.png" alt="NH"></div>
+      </div>
+      <div class="program-row">
+        <img src="logos/phsa.png" alt="PHSA">
+        <img src="logos/him.png" alt="HIM">
+      </div>
+      <div class="fine-print">Data refreshes automatically from master sheet</div>
+    </div>
+  </div>
+</div>
+
+<div style="height:3rem"></div>
+</body>
+</html>

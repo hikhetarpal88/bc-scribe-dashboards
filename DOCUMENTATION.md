@@ -243,6 +243,7 @@ GitHub Pages typically deploys within 1-2 minutes. Users may need to hard refres
 
 ## Performance Optimizations
 
+- **LocalStorage caching (stale-while-revalidate):** On first visit, data is cached in `localStorage` under key `scribe_cache_<HA>`. On subsequent visits, cached data renders instantly while fresh data loads in the background. Header shows "(updating...)" during background refresh.
 - **Prefetch:** Data fetch starts immediately in `<head>` (runs in parallel with Chart.js CDN download)
 - **Preconnect:** DNS/TLS handshake for `cdn.jsdelivr.net` and `script.google.com` starts before any script loads
 - **Deduplication:** Handled client-side by email address to prevent duplicate provider entries

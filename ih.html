@@ -260,6 +260,7 @@ const COLORS = ['#2E7D8C','#3aadbe','#f5803e','#a855f7','#ec4899','#eab308','#14
 
 let RAW_DATA = [];
 let charts = {};
+const CACHE_KEY = 'scribe_cache_' + HA;
 
 function dedup(rows) {
   const seen = new Set();
@@ -272,17 +273,35 @@ function dedup(rows) {
   });
 }
 
+function renderData(json, source) {
+  RAW_DATA = dedup(json.data || []);
+  const ts = new Date(json.timestamp).toLocaleString();
+  document.getElementById('refreshInfo').textContent =
+    'Last refreshed: ' + ts + ' \u2014 ' + RAW_DATA.length + ' providers' + (source === 'cache' ? ' (updating\u2026)' : '');
+  populateFilters();
+  applyFilters();
+}
+
 async function loadData() {
+  // 1. Show cached data instantly if available
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const cacheJson = JSON.parse(cached);
+      renderData(cacheJson, 'cache');
+    }
+  } catch(e) {}
+
+  // 2. Fetch fresh data in background
   try {
     const json = window.__dataPromise ? await window.__dataPromise : await fetch(PROXY + '?ha=' + HA).then(r=>r.json());
     if (json.error) throw new Error(json.error);
-    RAW_DATA = dedup(json.data || []);
-    document.getElementById('refreshInfo').textContent =
-      'Last refreshed: ' + new Date(json.timestamp).toLocaleString() + ' \u2014 ' + RAW_DATA.length + ' providers';
-    populateFilters();
-    applyFilters();
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(json)); } catch(e) {}
+    renderData(json, 'live');
   } catch(e) {
-    document.getElementById('refreshInfo').textContent = 'Error: ' + e.message;
+    if (!RAW_DATA.length) {
+      document.getElementById('refreshInfo').textContent = 'Error: ' + e.message;
+    }
   }
 }
 

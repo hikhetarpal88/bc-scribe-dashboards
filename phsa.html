@@ -232,6 +232,8 @@
     <div class="logos-row">
       <img src="logos/phsa.png" alt="PHSA Logo">
       <div class="logo-divider"></div>
+      <img src="logos/phsa.png" alt="PHSA Logo">
+      <div class="logo-divider"></div>
       <img src="logos/him.png" alt="HIM Logo">
     </div>
   </div>
@@ -378,6 +380,7 @@ const SPECIALTY_MAP = {
   'hepatobiliary surgeon': 'Hepatobiliary Surgery',
   'vascular surgeon': 'Vascular Surgery',
   'gynaecologist': 'Gynaecology',
+  'urogynaecologist': 'Urogynaecology',
   'gynaecological oncologist': 'Gynaecological Oncology',
   'hospitalist': 'Hospital Medicine',
   'psychogeriatrician': 'Psychogeriatrics',
@@ -536,16 +539,30 @@ function updateScorecards(data) {
 function updateExecSummary(data) {
   const el = document.getElementById('execSummary');
   if (!data.length) { el.innerHTML = ''; return; }
+  const specFilter = document.getElementById('filterSpecialty').value;
+  const vendorFilter = document.getElementById('filterVendor').value;
   const specs = countBy(data, 'Clinical Specialty', true);
   const vendors = countBy(data, 'Vendor', true);
-  const topSpec = specs.length ? specs[0] : null;
-  const topVendor = vendors.length ? vendors[0] : null;
-  const topSpecPct = topSpec ? Math.round(topSpec[1] / data.length * 100) : 0;
   let summary = '';
-  if (topSpec) summary += '<strong>' + esc(topSpec[0]) + '</strong> leads with ' + topSpecPct + '% of sign-ups';
-  if (topVendor && vendors.length > 1) summary += ' across <strong>' + vendors.length + '</strong> active vendors';
-  else if (topVendor) summary += ' with <strong>' + esc(topVendor[0]) + '</strong> as the active vendor';
-  if (topSpec && specs.length > 1) summary += '. Top 3: ' + specs.slice(0,3).map(s => esc(s[0]) + ' (' + s[1] + ')').join(', ');
+
+  if (specFilter) {
+    // Specialty filter active — show vendor breakdown for this specialty
+    summary += '<strong>' + data.length + '</strong> ' + esc(specFilter) + ' provider' + (data.length !== 1 ? 's' : '');
+    if (vendors.length === 1) summary += ' via <strong>' + esc(vendors[0][0]) + '</strong>';
+    else if (vendors.length > 1) summary += ' across ' + vendors.map(v => esc(v[0]) + ' (' + v[1] + ')').join(', ');
+  } else {
+    // No specialty filter — show top specialty insight
+    const topSpec = specs.length ? specs[0] : null;
+    const topSpecPct = topSpec ? Math.round(topSpec[1] / data.length * 100) : 0;
+    if (topSpec) {
+      summary += '<strong>' + esc(topSpec[0]) + '</strong> leads with ' + topSpecPct + '% of sign-ups';
+      const topSpecRows = data.filter(r => r['Clinical Specialty'] === topSpec[0]);
+      const topSpecVendors = [...new Set(topSpecRows.map(r => r['Vendor']).filter(Boolean))];
+      if (topSpecVendors.length === 1) summary += ' via <strong>' + esc(topSpecVendors[0]) + '</strong>';
+      else if (topSpecVendors.length > 1) summary += ' across <strong>' + topSpecVendors.length + '</strong> vendors';
+    }
+    if (topSpec && specs.length > 1) summary += '. Top 3: ' + specs.slice(0,3).map(s => esc(s[0]) + ' (' + s[1] + ')').join(', ');
+  }
   el.innerHTML = summary;
 }
 

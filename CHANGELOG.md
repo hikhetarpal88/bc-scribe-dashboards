@@ -4,6 +4,23 @@ All notable changes to these dashboards are documented here.
 
 ---
 
+## 2026-04-09 — v3.2 Executive Summary Fix (all 7 dashboards)
+
+### Fixed — Executive summary vendor attribution
+- Vendor count/name now reflects the **top specialty specifically**, not all specialties combined
+- Previously: "Geriatrics leads with 13% of sign-ups across 2 active vendors" (wrong — Geriatrics only uses Heidi)
+- Now: "Geriatrics leads with 13% of sign-ups via **Heidi**"
+
+### Fixed — Executive summary when specialty filter is active
+- Previously showed misleading "X leads with 100% of sign-ups across N vendors" when filtering by specialty
+- Now shows contextual vendor breakdown: e.g., "4 Emergency Medicine providers across Heidi (3), Empathia (1)"
+- Single-vendor specialties show "via **VendorName**"
+
+### Added — Urogynaecologist normalization
+- Added mapping: "Urogynaecologist" → "Urogynaecology"
+
+---
+
 ## 2026-04-09 — v3.1 Specialty Data Normalization (all 7 dashboards)
 
 ### Added — Real-time specialty normalization

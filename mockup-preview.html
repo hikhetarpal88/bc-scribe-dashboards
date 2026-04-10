@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOCKUP — Design Preview (v4 Proposal)</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f0f5f7; color:#1a1a2e; }
+
+  :root {
+    --primary: #1a5c6b;
+    --accent: #2E7D8C;
+    --accent-light: #3a9aad;
+    --bg: #f0f5f7;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e2ebee;
+    --gradient-start: #1a5c6b;
+    --gradient-end: #2E7D8C;
+    --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.06);
+    --shadow-lg: 0 2px 6px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.08);
+  }
+
+  .mockup-banner {
+    background: linear-gradient(135deg, #f59e4f, #e85d75);
+    color:#fff; text-align:center; padding:0.6rem; font-size:0.85rem; font-weight:600;
+    letter-spacing:0.5px;
+  }
+
+  .section-label {
+    max-width:1100px; margin:2rem auto 0.75rem; padding:0 1.5rem;
+    font-size:0.85rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px;
+    color: var(--accent); display:flex; align-items:center; gap:0.75rem;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  .compare-row {
+    max-width:1100px; margin:0 auto 2rem; padding:0 1.5rem;
+    display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;
+  }
+  .compare-card {
+    background:var(--card); border-radius:1rem; padding:1.5rem; box-shadow:var(--shadow);
+    position:relative;
+  }
+  .compare-card h3 {
+    font-size:0.72rem; text-transform:uppercase; letter-spacing:0.75px;
+    color:var(--muted); margin-bottom:1.25rem; display:flex; align-items:center; gap:0.5rem;
+  }
+  .badge-old { background:#fee2e2; color:#dc2626; font-size:0.65rem; padding:0.15rem 0.5rem; border-radius:1rem; font-weight:700; }
+  .badge-new { background:#d1fae5; color:#059669; font-size:0.65rem; padding:0.15rem 0.5rem; border-radius:1rem; font-weight:700; }
+
+  /* === LOGO COMPARISON === */
+  .header-demo {
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    border-radius:0.75rem; padding:1.25rem 1.5rem; color:#fff;
+  }
+  .header-demo .title { font-size:1rem; font-weight:700; margin-bottom:0.15rem; }
+  .header-demo .subtitle { font-size:0.8rem; opacity:0.85; margin-bottom:0.75rem; }
+
+  /* Old logo style */
+  .logos-row-old { display:flex; align-items:center; gap:1rem; }
+  .logos-row-old img {
+    height: 36px; width: auto; object-fit: contain;
+    background: rgba(255,255,255,0.95); padding: 6px 12px; border-radius: 8px;
+  }
+  .logos-row-old .logo-divider { width:1px; height:30px; background:rgba(255,255,255,0.3); }
+
+  /* New logo style — uniform containers */
+  .logos-row-new { display:flex; align-items:center; gap:0.75rem; }
+  .logo-container {
+    background: rgba(255,255,255,0.95);
+    border-radius: 10px;
+    width: 140px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+  }
+  .logo-container img {
+    max-height: 34px;
+    max-width: 110px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  .logo-container.square-logo {
+    width: 80px;
+  }
+  .logo-container.square-logo img {
+    max-height: 36px;
+    max-width: 60px;
+  }
+
+  /* === PROGRESS BARS === */
+  .progress-list { display:flex; flex-direction:column; gap:0.65rem; }
+  .progress-item { display:flex; align-items:center; gap:0.75rem; }
+  .progress-label {
+    width:140px; flex-shrink:0; font-size:0.8rem; font-weight:500;
+    color:var(--text); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .progress-track {
+    flex:1; height:26px; background:#f0f5f7; border-radius:13px; overflow:hidden; position:relative;
+  }
+  .progress-fill {
+    height:100%; border-radius:13px; position:relative;
+    background: linear-gradient(90deg, var(--gradient-start), var(--accent-light));
+    transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    min-width: 2rem;
+  }
+  .progress-fill .count {
+    position:absolute; right:8px; top:50%; transform:translateY(-50%);
+    font-size:0.72rem; font-weight:700; color:#fff;
+  }
+  .progress-fill.short .count {
+    right: -28px; color: var(--text);
+  }
+  .progress-pct {
+    width:38px; flex-shrink:0; font-size:0.72rem; font-weight:600; color:var(--muted); text-align:right;
+  }
+
+  /* Alternate colors for progress bars */
+  .progress-item:nth-child(2) .progress-fill { background: linear-gradient(90deg, #f59e4f, #f7b97a); }
+  .progress-item:nth-child(3) .progress-fill { background: linear-gradient(90deg, #7c5cbf, #a78bfa); }
+  .progress-item:nth-child(4) .progress-fill { background: linear-gradient(90deg, #e85d75, #f093a4); }
+  .progress-item:nth-child(5) .progress-fill { background: linear-gradient(90deg, #4ecdc4, #7eddd6); }
+  .progress-item:nth-child(6) .progress-fill { background: linear-gradient(90deg, #f7b731, #fad06b); }
+  .progress-item:nth-child(7) .progress-fill { background: linear-gradient(90deg, #6366f1, #929aff); }
+  .progress-item:nth-child(8) .progress-fill { background: linear-gradient(90deg, #45b7d1, #7bcfe0); }
+
+  /* Doughnut placeholder (for vendor chart) */
+  .doughnut-placeholder {
+    width:180px; height:180px; margin:0 auto; border-radius:50%; position:relative;
+    background: conic-gradient(
+      #2E7D8C 0% 87%,
+      #f59e4f 87% 97%,
+      #7c5cbf 97% 100%
+    );
+  }
+  .doughnut-placeholder::after {
+    content:''; position:absolute; top:22%; left:22%; width:56%; height:56%;
+    border-radius:50%; background:#fff;
+  }
+  .doughnut-legend {
+    display:flex; justify-content:center; gap:1.25rem; margin-top:1rem; flex-wrap:wrap;
+  }
+  .legend-item { display:flex; align-items:center; gap:0.35rem; font-size:0.78rem; color:var(--muted); }
+  .legend-dot { width:8px; height:8px; border-radius:50%; }
+
+  /* Full-width section */
+  .full-row {
+    max-width:1100px; margin:0 auto 2rem; padding:0 1.5rem;
+  }
+  .full-card {
+    background:var(--card); border-radius:1rem; padding:1.5rem; box-shadow:var(--shadow);
+  }
+  .full-card h3 {
+    font-size:0.72rem; text-transform:uppercase; letter-spacing:0.75px;
+    color:var(--muted); margin-bottom:1.25rem; display:flex; align-items:center; gap:0.5rem;
+  }
+
+  /* Side-by-side new layout preview */
+  .new-layout {
+    display:grid; grid-template-columns:1.3fr 0.7fr; gap:1.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .compare-row { grid-template-columns:1fr; }
+    .new-layout { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-banner">DESIGN MOCKUP — v4 Proposal Preview (not live)</div>
+
+<!-- ===== LOGO COMPARISON ===== -->
+<div class="section-label">Logo Integration</div>
+<div class="compare-row">
+  <div class="compare-card">
+    <h3><span class="badge-old">CURRENT</span> VCH Header — Logo too small</h3>
+    <div class="header-demo">
+      <div class="title">BC Scribe Self-Pay Program Dashboard</div>
+      <div class="subtitle">VCH — Vancouver Coastal Health</div>
+      <div class="logos-row-old">
+        <img src="logos/vch.png" alt="VCH Logo">
+        <div class="logo-divider"></div>
+        <img src="logos/phsa.png" alt="PHSA Logo">
+        <div class="logo-divider"></div>
+        <img src="logos/him.png" alt="HIM Logo">
+      </div>
+    </div>
+  </div>
+  <div class="compare-card">
+    <h3><span class="badge-new">PROPOSED</span> Uniform logo containers</h3>
+    <div class="header-demo">
+      <div class="title">BC Scribe Self-Pay Program Dashboard</div>
+      <div class="subtitle">VCH — Vancouver Coastal Health</div>
+      <div class="logos-row-new">
+        <div class="logo-container square-logo">
+          <img src="logos/vch.png" alt="VCH Logo">
+        </div>
+        <div class="logo-container">
+          <img src="logos/phsa.png" alt="PHSA Logo">
+        </div>
+        <div class="logo-container">
+          <img src="logos/him.png" alt="HIM Logo">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHC logo comparison -->
+<div class="compare-row">
+  <div class="compare-card">
+    <h3><span class="badge-old">CURRENT</span> PHC Header — Works fine (wide logo)</h3>
+    <div class="header-demo">
+      <div class="title">BC Scribe Self-Pay Program Dashboard</div>
+      <div class="subtitle">PHC — Providence Health Care</div>
+      <div class="logos-row-old">
+        <img src="logos/phc.png" alt="PHC Logo">
+        <div class="logo-divider"></div>
+        <img src="logos/phsa.png" alt="PHSA Logo">
+        <div class="logo-divider"></div>
+        <img src="logos/him.png" alt="HIM Logo">
+      </div>
+    </div>
+  </div>
+  <div class="compare-card">
+    <h3><span class="badge-new">PROPOSED</span> PHC — Same container approach</h3>
+    <div class="header-demo">
+      <div class="title">BC Scribe Self-Pay Program Dashboard</div>
+      <div class="subtitle">PHC — Providence Health Care</div>
+      <div class="logos-row-new">
+        <div class="logo-container">
+          <img src="logos/phc.png" alt="PHC Logo">
+        </div>
+        <div class="logo-container">
+          <img src="logos/phsa.png" alt="PHSA Logo">
+        </div>
+        <div class="logo-container">
+          <img src="logos/him.png" alt="HIM Logo">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHART COMPARISON ===== -->
+<div class="section-label">Specialty Chart — Progress Bars vs Doughnut</div>
+
+<div class="full-row">
+  <div class="full-card">
+    <h3><span class="badge-new">PROPOSED</span> New layout — Progress bars for specialties + Doughnut for vendors</h3>
+    <div class="new-layout">
+      <div>
+        <h3 style="margin-bottom:1rem;">Sign-Ups by Clinical Specialty</h3>
+        <div class="progress-list">
+          <div class="progress-item">
+            <span class="progress-label">Geriatrics</span>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:100%"><span class="count">6</span></div>
+            </div>
+            <span class="progress-pct">13%</span>
+          </div>
+          <div class="progress-item">
+            <span class="progress-label">Psychiatry</span>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:83%"><span class="count">5</span></div>
+            </div>
+            <span class="progress-pct">11%</span>
+          </div>
+          <div class="progress-item">
+            <span class="progress-label">General Surgery</span>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:83%"><span class="count">5</span></div>
+            </div>
+            <span class="progress-pct">11%</span>
+          </div>
+          <div class="progress-item">
+            <span class="progress-label">Emergency Medicine</span>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:67%"><span class="count">4</span></div>
+            </div>
+            <span class="progress-pct">9%</span>
+          </div>
+          <div class="progress-item">
+            <span class="progress-label">Internal Medicine</span>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:50%"><span class="count">3</span></div>
+            </div>
+            <span class="progress-pct">6%</span>
+          </div>
+          <div class="progress-item">
+            <span class="progress-label">Cardiology</span>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:50%"><span class="count">3</span></div>
+            </div>
+            <span class="progress-pct">6%</span>
+          </div>
+          <div class="progress-item">
+            <span class="progress-label">Otolaryngology (ENT)</span>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:50%"><span class="count">3</span></div>
+            </div>
+            <span class="progress-pct">6%</span>
+          </div>
+          <div class="progress-item">
+            <span class="progress-label">Respiratory Medicine</span>
+            <div class="progress-track">
+              <div class="progress-fill" style="width:50%"><span class="count">3</span></div>
+            </div>
+            <span class="progress-pct">6%</span>
+          </div>
+        </div>
+        <div style="text-align:center; margin-top:0.75rem; font-size:0.72rem; color:var(--muted);">
+          Top 8 of 17 specialties shown &bull; Use filter to explore all
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <h3 style="margin-bottom:1rem; align-self:flex-start;">Sign-Ups by Vendor</h3>
+        <div class="doughnut-placeholder"></div>
+        <div class="doughnut-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#2E7D8C"></div>Heidi (42)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f59e4f"></div>Empathia (5)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:1100px; margin:0 auto 3rem; padding:0 1.5rem; text-align:center; color:var(--muted); font-size:0.82rem;">
+  <strong>Summary of changes:</strong><br>
+  1. Uniform logo containers (fixed width) — square logos like VCH get proper space<br>
+  2. Specialty chart: progress bars with gradient fills, counts, and percentages — scannable at a glance<br>
+  3. Vendor chart: keeps the doughnut (works great for 2-3 items)<br>
+  4. Top 8 specialties shown by default, rest accessible via filter
+</div>
+
+</body>
+</html>

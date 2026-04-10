@@ -49,13 +49,15 @@
   .header .subtitle { opacity:0.85; font-size:0.9rem; }
   .header .refresh-info { opacity:0.6; font-size:0.78rem; margin-top:0.5rem; position:relative; z-index:1; }
 
-  /* Logos row */
-  .logos-row { display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap; }
+  /* Logos row — frosted glass pills */
+  .logos-row { display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
   .logos-row img {
-    height: 36px; width: auto; object-fit: contain;
-    background: rgba(255,255,255,0.95); padding: 6px 12px; border-radius: 8px;
+    height:38px; width:auto; object-fit:contain;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    padding:6px 16px; border-radius:10px;
+    border: 1px solid rgba(255,255,255,0.3);
   }
-  .logos-row .logo-divider { width:1px; height:30px; background:rgba(255,255,255,0.3); }
 
   /* Scorecard */
   .scorecard-row {
@@ -133,9 +135,9 @@
   }
   .btn-reset:hover { background: var(--primary); transform:translateY(-1px); }
 
-  /* Charts Grid */
+  /* Charts Grid — progress bars + doughnut */
   .charts-grid {
-    display:grid; grid-template-columns: repeat(2, 1fr);
+    display:grid; grid-template-columns: 1.4fr 0.6fr;
     gap:1.25rem; margin-bottom:1.5rem;
   }
   .chart-card {
@@ -148,6 +150,32 @@
     text-transform:uppercase; letter-spacing:0.75px;
   }
   .chart-wrapper { position:relative; width:100%; height:280px; }
+
+  /* Progress bars for specialty */
+  .progress-list { display:flex; flex-direction:column; gap:0.6rem; }
+  .progress-item { display:flex; align-items:center; gap:0.75rem; }
+  .progress-label {
+    width:220px; flex-shrink:0; font-size:0.78rem; font-weight:500;
+    color:var(--text); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .progress-track {
+    flex:1; height:26px; background:#f0f5f7; border-radius:13px; overflow:hidden; position:relative;
+  }
+  .progress-fill {
+    height:100%; border-radius:13px; position:relative;
+    transition: width 0.8s cubic-bezier(0.25,0.46,0.45,0.94); min-width:2rem;
+  }
+  .progress-fill .count {
+    position:absolute; right:8px; top:50%; transform:translateY(-50%);
+    font-size:0.72rem; font-weight:700; color:#fff;
+  }
+  .progress-fill.count-outside .count { right:-30px; color:var(--text); }
+  .progress-pct {
+    width:38px; flex-shrink:0; font-size:0.72rem; font-weight:600; color:var(--muted); text-align:right;
+  }
+  .progress-footer {
+    text-align:center; margin-top:0.75rem; font-size:0.72rem; color:var(--muted);
+  }
 
   /* Provider Database Section */
   .provider-section { margin-top: 1rem; }
@@ -209,15 +237,13 @@
   /* Footer */
   .footer { text-align:center; padding:1.25rem; color:var(--muted); font-size:0.78rem; border-top:1px solid var(--border); margin-top:1rem; }
 
-  @media (max-width:1024px) {
-    .charts-grid { grid-template-columns: 1fr 1fr; }
-  }
   @media (max-width:768px) {
     .header { padding:1.25rem; }
     .scorecard-row, .content { padding-left:1rem; padding-right:1rem; }
     .charts-grid { grid-template-columns:1fr; }
     .scorecard-row { grid-template-columns:1fr; }
-    .logos-row img { height:30px; }
+    .logos-row img { height:30px; padding:4px 10px; }
+    .progress-label { width:150px; font-size:0.75rem; }
   }
 </style>
 </head>
@@ -231,9 +257,7 @@
     </div>
     <div class="logos-row">
       <img src="logos/viha.svg" alt="VIHA Logo">
-      <div class="logo-divider"></div>
       <img src="logos/phsa.png" alt="PHSA Logo">
-      <div class="logo-divider"></div>
       <img src="logos/him.png" alt="HIM Logo">
     </div>
   </div>
@@ -274,7 +298,11 @@
   </div>
 
   <div class="charts-grid">
-    <div class="chart-card"><h3>Sign-Ups by Clinical Specialty</h3><div class="chart-wrapper"><canvas id="chartSpecialty"></canvas></div></div>
+    <div class="chart-card">
+      <h3>Sign-Ups by Clinical Specialty</h3>
+      <div id="specialtyBars" class="progress-list"></div>
+      <div id="specialtyFooter" class="progress-footer"></div>
+    </div>
     <div class="chart-card"><h3>Sign-Ups by Vendor</h3><div class="chart-wrapper"><canvas id="chartVendor"></canvas></div></div>
   </div>
 
@@ -577,9 +605,55 @@ function countBy(data, field, excludeBlanks) {
   return Object.entries(map).sort((a,b) => b[1]-a[1]);
 }
 
+const BAR_GRADIENTS = [
+  'linear-gradient(90deg, #1a5c6b, #48b5c4)',
+  'linear-gradient(90deg, #f59e4f, #f7b97a)',
+  'linear-gradient(90deg, #7c5cbf, #a78bfa)',
+  'linear-gradient(90deg, #e85d75, #f093a4)',
+  'linear-gradient(90deg, #4ecdc4, #7eddd6)',
+  'linear-gradient(90deg, #f7b731, #fad06b)',
+  'linear-gradient(90deg, #6366f1, #929aff)',
+  'linear-gradient(90deg, #45b7d1, #7bcfe0)',
+  'linear-gradient(90deg, #26de81, #6aecaa)',
+  'linear-gradient(90deg, #ff6b6b, #ffa0a0)',
+  'linear-gradient(90deg, #a55eea, #c99eff)',
+  'linear-gradient(90deg, #2E7D8C, #5ab0be)'
+];
+
 function renderCharts(data) {
-  renderDoughnut('chartSpecialty', countBy(data,'Clinical Specialty', true).slice(0,10));
-  renderBar('chartVendor', countBy(data,'Vendor', true));
+  renderSpecialtyBars(countBy(data, 'Clinical Specialty', true));
+  renderDoughnut('chartVendor', countBy(data, 'Vendor', true));
+}
+
+function renderSpecialtyBars(entries) {
+  const container = document.getElementById('specialtyBars');
+  const footer = document.getElementById('specialtyFooter');
+  if (!entries.length) {
+    container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted)">No specialty data</div>';
+    footer.textContent = '';
+    return;
+  }
+  const max = entries[0][1];
+  const total = entries.reduce((s,e) => s+e[1], 0);
+  const show = entries.slice(0, 10);
+  container.innerHTML = show.map((e, i) => {
+    const pct = Math.round(e[1] / total * 100);
+    const widthPct = Math.max(Math.round(e[1] / max * 100), 8);
+    const outsideClass = widthPct < 20 ? ' count-outside' : '';
+    return '<div class="progress-item">'
+      + '<span class="progress-label" title="' + esc(e[0]) + '">' + esc(e[0]) + '</span>'
+      + '<div class="progress-track">'
+      + '<div class="progress-fill' + outsideClass + '" style="width:' + widthPct + '%;background:' + BAR_GRADIENTS[i % BAR_GRADIENTS.length] + '">'
+      + '<span class="count">' + e[1] + '</span>'
+      + '</div></div>'
+      + '<span class="progress-pct">' + pct + '%</span>'
+      + '</div>';
+  }).join('');
+  if (entries.length > 10) {
+    footer.textContent = 'Top 10 of ' + entries.length + ' specialties shown \u2022 Use filter to explore all';
+  } else {
+    footer.textContent = entries.length + ' specialties';
+  }
 }
 
 function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
@@ -608,50 +682,10 @@ function renderDoughnut(id, entries) {
       responsive:true, maintainAspectRatio:false, cutout:'65%',
       animation:{ animateRotate:true, duration:800, easing:'easeOutQuart' },
       plugins:{
-        legend:{ position:'right', labels:{boxWidth:10, padding:8, font:{size:11, weight:'500'}, usePointStyle:true, pointStyle:'circle'} },
+        legend:{ position:'bottom', labels:{boxWidth:10, padding:10, font:{size:11, weight:'500'}, usePointStyle:true, pointStyle:'circle'} },
         tooltip:{ backgroundColor:'rgba(26,92,107,0.92)', titleFont:{size:12,weight:'600'}, bodyFont:{size:11}, padding:10, cornerRadius:8,
           callbacks:{ label: function(ctx){ const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ' '+ctx.label+': '+ctx.raw+' ('+Math.round(ctx.raw/t*100)+'%)'; } }
         }
-      }
-    }
-  });
-}
-
-function renderBar(id, entries) {
-  destroyChart(id);
-  if (!entries.length) {
-    charts[id] = new Chart(document.getElementById(id), {
-      type:'bar', data:{labels:['No data'],datasets:[{data:[0]}]},
-      options:{responsive:true, plugins:{legend:{display:false}}}
-    });
-    return;
-  }
-  const canvas = document.getElementById(id);
-  const ctx = canvas.getContext('2d');
-  const gradient = ctx.createLinearGradient(0,0,canvas.width,0);
-  gradient.addColorStop(0,'#1a5c6b'); gradient.addColorStop(1,'#48b5c4');
-  charts[id] = new Chart(canvas, {
-    type:'bar',
-    data: {
-      labels: entries.map(e=>e[0]),
-      datasets: [{
-        data: entries.map(e=>e[1]),
-        backgroundColor: gradient, borderRadius:8, maxBarThickness:36,
-        borderSkipped:false
-      }]
-    },
-    options: {
-      indexAxis:'y', responsive:true, maintainAspectRatio:false,
-      animation:{ duration:800, easing:'easeOutQuart' },
-      plugins:{
-        legend:{display:false},
-        tooltip:{ backgroundColor:'rgba(26,92,107,0.92)', titleFont:{size:12,weight:'600'}, bodyFont:{size:11}, padding:10, cornerRadius:8 }
-      },
-      scales:{
-        x:{ beginAtZero:true, ticks:{precision:0, font:{size:11}, color:'#9ca3af'},
-          grid:{color:'rgba(0,0,0,0.04)', drawBorder:false} },
-        y:{ ticks:{font:{size:12, weight:'500'}, color:'#374151', padding:8},
-          grid:{display:false} }
       }
     }
   });

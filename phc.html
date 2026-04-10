@@ -79,6 +79,16 @@
     padding:0.5rem 2.5rem 0; position:relative; z-index:2;
   }
 
+  /* Executive Summary */
+  .exec-summary {
+    margin: 0.75rem 2.5rem 0; padding: 0.85rem 1.25rem;
+    background: linear-gradient(135deg, rgba(46,125,140,0.07), rgba(58,173,190,0.07));
+    border-left: 4px solid var(--accent); border-radius: 0 0.75rem 0.75rem 0;
+    font-size: 0.9rem; color: var(--primary); line-height: 1.5;
+  }
+  .exec-summary:empty { display: none; }
+  .exec-summary strong { color: var(--accent); }
+
   /* Content */
   .content { padding: 0 2.5rem 2.5rem; }
 
@@ -203,6 +213,7 @@
   <div class="scorecard"><div class="value" id="totalSpecialties">-</div><div class="label">Specialties</div></div>
 </div>
 <div class="data-note">Providers who signed up on or after December 3, 2025</div>
+<div class="exec-summary" id="execSummary"></div>
 
 <div class="content">
   <!-- OVERVIEW SECTION -->
@@ -344,12 +355,44 @@ function applyFilters() {
   updateScorecards(data);
   renderCharts(data);
   renderTable(data);
+  updateExecSummary(data);
+}
+
+function animateCount(el, target) {
+  const duration = 600;
+  const start = parseInt(el.textContent) || 0;
+  el.textContent = target;
+  if (start === target) return;
+  const startTime = performance.now();
+  function tick(now) {
+    const p = Math.min((now - startTime) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(start + (target - start) * ease);
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 }
 
 function updateScorecards(data) {
-  document.getElementById('totalSignups').textContent = data.length;
-  document.getElementById('totalVendors').textContent = new Set(data.map(r=>r['Vendor']).filter(Boolean)).size;
-  document.getElementById('totalSpecialties').textContent = new Set(data.map(r=>r['Clinical Specialty']).filter(Boolean)).size;
+  animateCount(document.getElementById('totalSignups'), data.length);
+  animateCount(document.getElementById('totalVendors'), new Set(data.map(r=>r['Vendor']).filter(Boolean)).size);
+  animateCount(document.getElementById('totalSpecialties'), new Set(data.map(r=>r['Clinical Specialty']).filter(Boolean)).size);
+}
+
+function updateExecSummary(data) {
+  const el = document.getElementById('execSummary');
+  if (!data.length) { el.innerHTML = ''; return; }
+  const specs = countBy(data, 'Clinical Specialty', true);
+  const vendors = countBy(data, 'Vendor', true);
+  const topSpec = specs.length ? specs[0] : null;
+  const topVendor = vendors.length ? vendors[0] : null;
+  const topSpecPct = topSpec ? Math.round(topSpec[1] / data.length * 100) : 0;
+  let summary = '';
+  if (topSpec) summary += '<strong>' + esc(topSpec[0]) + '</strong> leads with ' + topSpecPct + '% of sign-ups';
+  if (topVendor && vendors.length > 1) summary += ' across <strong>' + vendors.length + '</strong> active vendors';
+  else if (topVendor) summary += ' with <strong>' + esc(topVendor[0]) + '</strong> as the active vendor';
+  if (topSpec && specs.length > 1) summary += '. Top 3: ' + specs.slice(0,3).map(s => esc(s[0]) + ' (' + s[1] + ')').join(', ');
+  el.innerHTML = summary;
 }
 
 function countBy(data, field, excludeBlanks) {

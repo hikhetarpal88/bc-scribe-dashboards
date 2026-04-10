@@ -17,13 +17,16 @@
     --primary: #1a5c6b;
     --accent: #2E7D8C;
     --accent-light: #3a9aad;
-    --bg: #f4f8f9;
-    --card: #ffffff;
+    --bg: #e8f0f2;
+    --card: #e8f0f2;
     --text: #1a1a2e;
     --muted: #6b7280;
-    --border: #d9e6ea;
+    --border: #d0dfe3;
     --gradient-start: #1a5c6b;
     --gradient-end: #2E7D8C;
+    --neu-shadow: 6px 6px 14px rgba(163,183,190,0.45), -6px -6px 14px rgba(255,255,255,0.8);
+    --neu-shadow-sm: 4px 4px 10px rgba(163,183,190,0.35), -4px -4px 10px rgba(255,255,255,0.7);
+    --neu-inset: inset 3px 3px 6px rgba(163,183,190,0.35), inset -3px -3px 6px rgba(255,255,255,0.7);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
@@ -61,33 +64,38 @@
 
   /* Scorecard */
   .scorecard-row {
-    display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-    gap:1.25rem; padding:1.5rem 2.5rem; margin-top:-1.25rem; position:relative; z-index:2;
+    display:grid; grid-template-columns: repeat(3, 1fr);
+    gap:1.5rem; padding:1.5rem 2.5rem; margin-top:-1.25rem; position:relative; z-index:2;
   }
   .scorecard {
-    background: var(--card); border-radius:1rem; padding:1.5rem 1.25rem; text-align:center;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06); transition: transform 0.25s, box-shadow 0.25s;
-    position: relative; overflow: hidden; border: 1px solid rgba(46,125,140,0.08);
+    background: var(--card); border-radius:1.25rem; padding:1.75rem 1.5rem;
+    box-shadow: var(--neu-shadow); transition: all 0.3s ease;
+    display:flex; align-items:center; gap:1.25rem; position:relative;
   }
-  .scorecard::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:3px;
-    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  .scorecard:hover { box-shadow: var(--neu-shadow-sm); transform: translateY(-1px); }
+  .scorecard .icon-ring {
+    width:64px; height:64px; border-radius:50%; flex-shrink:0;
+    background: var(--card); box-shadow: var(--neu-inset);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
   }
-  .scorecard::after {
-    content:''; position:absolute; top:0; right:0; width:80px; height:80px;
-    background: radial-gradient(circle at top right, rgba(46,125,140,0.06) 0%, transparent 70%);
+  .scorecard .icon-ring::before {
+    content:''; position:absolute; inset:4px; border-radius:50%;
+    border:3px solid transparent; border-top-color: var(--accent); border-right-color: var(--accent-light);
+    animation: ring-pulse 3s ease-in-out infinite;
   }
-  .scorecard:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(46,125,140,0.12); }
-  .scorecard .icon { font-size:1.5rem; margin-bottom:0.25rem; }
+  @keyframes ring-pulse {
+    0%,100% { opacity:0.6; } 50% { opacity:1; }
+  }
+  .scorecard .icon-ring svg { position:relative; z-index:1; }
+  .scorecard .metric { text-align:left; }
   .scorecard .value {
-    font-size:2.5rem; font-weight:800; letter-spacing:-1px;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; line-height:1.1;
+    font-size:2.2rem; font-weight:800; letter-spacing:-1px;
+    color: var(--primary); line-height:1.1;
   }
   .scorecard .label {
-    font-size:0.72rem; color: var(--muted); margin-top:0.4rem;
-    text-transform:uppercase; letter-spacing:1px; font-weight:500;
+    font-size:0.7rem; color: var(--muted); margin-top:0.3rem;
+    text-transform:uppercase; letter-spacing:1.2px; font-weight:600;
   }
 
   /* Data note */
@@ -98,10 +106,11 @@
 
   /* Executive Summary */
   .exec-summary {
-    margin: 0.75rem 2.5rem 0; padding: 0.85rem 1.25rem;
-    background: linear-gradient(135deg, rgba(46,125,140,0.07), rgba(58,173,190,0.07));
-    border-left: 4px solid var(--accent); border-radius: 0 0.75rem 0.75rem 0;
-    font-size: 0.9rem; color: var(--primary); line-height: 1.5;
+    margin: 0.75rem 2.5rem 0; padding: 1rem 1.5rem;
+    background: var(--card); border-radius:1rem;
+    box-shadow: var(--neu-shadow-sm);
+    font-size: 0.88rem; color: var(--primary); line-height: 1.5;
+    border-left: 4px solid var(--accent);
   }
   .exec-summary:empty { display: none; }
   .exec-summary strong { color: var(--accent); }
@@ -111,31 +120,32 @@
 
   /* Section titles */
   .section-title {
-    font-size:1.15rem; font-weight:700; color:var(--primary); margin:1.5rem 0 1rem;
-    padding-bottom:0.5rem; border-bottom:2px solid var(--accent); display:inline-block;
+    font-size:0.85rem; font-weight:700; color:var(--accent); margin:1.75rem 0 1rem;
+    text-transform:uppercase; letter-spacing:1.5px; display:inline-block;
+    padding-bottom:0.4rem; border-bottom:2px solid var(--accent);
   }
 
   /* Filters */
   .filters {
     display:flex; flex-wrap:wrap; gap:0.75rem; align-items:flex-end;
     background: var(--card); padding:1.25rem 1.5rem; border-radius:1rem;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04); margin-bottom:1.5rem;
-    border-left: 4px solid var(--accent);
+    box-shadow: var(--neu-shadow-sm); margin-bottom:1.5rem;
   }
-  .filters label { font-size:0.75rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; }
+  .filters label { font-size:0.7rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.75px; }
   .filters select, .filters input[type="date"] {
-    padding:0.5rem 0.75rem; border:1px solid var(--border); border-radius:0.5rem;
-    font-size:0.875rem; background:#fff; color:var(--text); min-width:155px;
-    outline:none; transition: border 0.2s;
+    padding:0.5rem 0.75rem; border:none; border-radius:0.6rem;
+    font-size:0.875rem; background:var(--card); color:var(--text); min-width:155px;
+    outline:none; transition: all 0.2s; box-shadow: var(--neu-inset);
   }
-  .filters select:focus, .filters input[type="date"]:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(46,125,140,0.15); }
-  .filter-group { display:flex; flex-direction:column; gap:0.25rem; }
+  .filters select:focus, .filters input[type="date"]:focus { box-shadow: var(--neu-inset), 0 0 0 2px rgba(46,125,140,0.2); }
+  .filter-group { display:flex; flex-direction:column; gap:0.35rem; }
   .btn-reset {
-    padding:0.5rem 1.25rem; background: var(--accent); color:#fff; border:none;
-    border-radius:0.5rem; cursor:pointer; font-size:0.85rem; font-weight:600;
-    transition: background 0.2s; margin-left:auto;
+    padding:0.55rem 1.5rem; background: linear-gradient(135deg, var(--accent), var(--accent-light)); color:#fff; border:none;
+    border-radius:0.6rem; cursor:pointer; font-size:0.82rem; font-weight:600;
+    transition: all 0.2s; margin-left:auto;
+    box-shadow: 3px 3px 8px rgba(46,125,140,0.3), -2px -2px 6px rgba(255,255,255,0.5);
   }
-  .btn-reset:hover { background: var(--primary); }
+  .btn-reset:hover { box-shadow: 1px 1px 4px rgba(46,125,140,0.3); transform:translateY(1px); }
 
   /* Charts Grid */
   .charts-grid {
@@ -143,14 +153,13 @@
     gap:1.5rem; margin-bottom:1.5rem;
   }
   .chart-card {
-    background: var(--card); border-radius:1rem; padding:1.75rem;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(46,125,140,0.06);
-    transition: box-shadow 0.25s;
+    background: var(--card); border-radius:1.25rem; padding:1.75rem;
+    box-shadow: var(--neu-shadow); transition: all 0.3s ease;
   }
-  .chart-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+  .chart-card:hover { box-shadow: var(--neu-shadow-sm); }
   .chart-card h3 {
-    font-size:0.85rem; font-weight:600; margin-bottom:1.25rem; color:var(--muted);
-    text-transform:uppercase; letter-spacing:0.75px;
+    font-size:0.78rem; font-weight:600; margin-bottom:1.25rem; color:var(--muted);
+    text-transform:uppercase; letter-spacing:1px;
   }
   .chart-wrapper { position:relative; width:100%; height:280px; }
 
@@ -162,33 +171,35 @@
     display:flex; gap:0.75rem; align-items:center; margin-bottom:1rem;
   }
   .search-bar input {
-    flex:1; max-width:500px; padding:0.65rem 1rem 0.65rem 2.5rem;
-    border:1px solid var(--border); border-radius:0.75rem; font-size:0.9rem;
-    outline:none; transition: border 0.2s, box-shadow 0.2s;
-    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.442.156a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E") no-repeat 0.75rem center;
+    flex:1; max-width:500px; padding:0.7rem 1rem 0.7rem 2.5rem;
+    border:none; border-radius:0.75rem; font-size:0.9rem;
+    outline:none; transition: all 0.2s;
+    background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.442.156a5 5 0 1 1 0-10 5 5 0 0 1 0 10z'/%3E%3C/svg%3E") no-repeat 0.75rem center;
+    box-shadow: var(--neu-inset);
   }
-  .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,125,140,0.12); }
+  .search-bar input:focus { box-shadow: var(--neu-inset), 0 0 0 2px rgba(46,125,140,0.2); }
   .search-bar input::placeholder { color:#aab4be; }
 
   /* Table */
   .table-card {
-    background: var(--card); border-radius:1rem; padding:1.5rem;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.04); overflow:hidden;
+    background: var(--card); border-radius:1.25rem; padding:1.5rem;
+    box-shadow: var(--neu-shadow); overflow:hidden;
   }
   .table-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem; }
-  .table-card h3 { font-size:1rem; font-weight:600; color:var(--primary); }
-  .table-count { font-size:0.85rem; color:var(--muted); }
-  .table-scroll { overflow-x:auto; max-height:600px; overflow-y:auto; }
+  .table-card h3 { font-size:0.95rem; font-weight:600; color:var(--primary); }
+  .table-count { font-size:0.82rem; color:var(--muted); }
+  .table-scroll { overflow-x:auto; max-height:600px; overflow-y:auto; border-radius:0.75rem; }
   table { width:100%; border-collapse:collapse; font-size:0.85rem; }
   thead th {
-    background: var(--accent); color:#fff; padding:0.7rem 1rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent)); color:#fff; padding:0.75rem 1rem;
     text-align:left; font-weight:600; white-space:nowrap; position:sticky; top:0; z-index:1;
+    font-size:0.78rem; text-transform:uppercase; letter-spacing:0.5px;
   }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-  tbody tr:hover { background: #eef6f7; }
-  tbody td { padding:0.6rem 1rem; white-space:nowrap; }
-  tbody tr:nth-child(even) { background: #f9fcfc; }
-  tbody tr:nth-child(even):hover { background: #eef6f7; }
+  tbody tr { border-bottom: 1px solid rgba(163,183,190,0.2); transition: background 0.15s; }
+  tbody tr:hover { background: rgba(46,125,140,0.06); }
+  tbody td { padding:0.65rem 1rem; white-space:nowrap; }
+  tbody tr:nth-child(even) { background: rgba(163,183,190,0.08); }
+  tbody tr:nth-child(even):hover { background: rgba(46,125,140,0.06); }
 
   /* Loading */
   .loading { display:flex; justify-content:center; align-items:center; min-height:400px; flex-direction:column; gap:1rem; }
@@ -230,9 +241,18 @@
 </div>
 
 <div class="scorecard-row">
-  <div class="scorecard"><div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2E7D8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="value" id="totalSignups">-</div><div class="label">Total Sign-Ups</div></div>
-  <div class="scorecard"><div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2E7D8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><div class="value" id="totalVendors">-</div><div class="label">Vendors</div></div>
-  <div class="scorecard"><div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2E7D8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="value" id="totalSpecialties">-</div><div class="label">Specialties</div></div>
+  <div class="scorecard">
+    <div class="icon-ring"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2E7D8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+    <div class="metric"><div class="value" id="totalSignups">-</div><div class="label">Total Sign-Ups</div></div>
+  </div>
+  <div class="scorecard">
+    <div class="icon-ring"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2E7D8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+    <div class="metric"><div class="value" id="totalVendors">-</div><div class="label">Vendors</div></div>
+  </div>
+  <div class="scorecard">
+    <div class="icon-ring"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2E7D8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+    <div class="metric"><div class="value" id="totalSpecialties">-</div><div class="label">Specialties</div></div>
+  </div>
 </div>
 <div class="data-note">Providers who signed up on or after December 3, 2025</div>
 <div class="exec-summary" id="execSummary"></div>

@@ -4,6 +4,37 @@ All notable changes to these dashboards are documented here.
 
 ---
 
+## 2026-05-06 — v4.5 Static JSON snapshots — fixes NH firewall blocking
+
+Multiple Northern Health users (Tim, Bjorn, +1) still saw "Failed to fetch" after v4.4, even after hard refresh and switching browsers. Root cause confirmed via redirect-chain inspection: every dashboard request bounces from `script.google.com` → `script.googleusercontent.com`, and NH's corporate firewall blocks the second domain.
+
+### Architecture change — eliminate the Apps Script call from the client
+
+Dashboards now fetch from a **same-origin static JSON file** in the GitHub Pages repo (`data/<HA>.json`). No redirect, no `googleusercontent.com`, no firewall to dodge. Apps Script is kept as a fallback (Tier 3) but rarely used.
+
+**Three-tier data fetch:**
+1. **Tier 1** — Head prefetch of `data/<HA>.json` (8s timeout, same-origin = ~50-200ms typical)
+2. **Tier 2** — Same-origin retry if Tier 1 missed
+3. **Tier 3** — Apps Script proxy (existing path, kept as graceful fallback)
+
+### Added — GitHub Action `.github/workflows/snapshot-data.yml`
+- Runs every 15 minutes on a cron schedule
+- Calls Apps Script for each of the 7 HAs (from GitHub-hosted runner IPs, not corporate networks)
+- Validates JSON shape, retries up to 3x per HA
+- Commits to `data/` only if content changed
+- `workflow_dispatch` enabled for manual refresh from the Actions tab
+- Concurrency-locked to prevent overlapping runs
+
+### Added — Initial data snapshots in `data/`
+- All 7 HAs seeded with current data (PHSA: 226, PHC: 43, VCH: 181, FHA: 179, VIHA: 122, IH: 98, NH: 19)
+- Total payload ~228KB across all 7 files
+
+### Tradeoff
+- Data freshness: 15-min lag instead of instant. Acceptable for this dashboard — vendor signups don't need real-time.
+- The 15-min cadence can be tightened to 5 min if needed by editing the cron in the workflow.
+
+---
+
 ## 2026-05-06 — v4.4 Deploy v4.3 + tightened timeouts and clearer error UX
 
 The v4.3 patches below were prepared on Apr 24 but never deployed (changes sat uncommitted). User reported the same "Failed to fetch" issue on May 6. Pushing v4.3 + tightening:

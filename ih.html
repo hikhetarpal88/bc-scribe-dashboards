@@ -10,19 +10,17 @@
 <link rel="dns-prefetch" href="https://script.google.com">
 <link rel="dns-prefetch" href="https://script.googleusercontent.com">
 <script>
-  // Start data fetch immediately with a 20s timeout (runs in parallel with Chart.js download).
-  // Retries/fallback are handled in loadData() below.
+  // Try same-origin static JSON first (firewall-immune, near-instant via GitHub Pages).
+  // Apps Script fallback is in loadData() below for cases where the snapshot is stale or missing.
   var __dataPromise = (function() {
-    var url = 'https://script.google.com/macros/s/AKfycbw5mxQzV4m9nFrhHGDboWNx_MtBJOvMJ9725_wkfEg9TrrG2H9bd6dQYVCWSMGYlNZ7/exec?ha=IH';
     var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    var timer = setTimeout(function(){ if (ctrl) try{ctrl.abort();}catch(e){} }, 15000);
-    return fetch(url, ctrl ? {signal: ctrl.signal} : {}).then(
+    var timer = setTimeout(function(){ if (ctrl) try{ctrl.abort();}catch(e){} }, 8000);
+    return fetch('data/IH.json', ctrl ? {signal: ctrl.signal, cache: 'no-cache'} : {cache: 'no-cache'}).then(
       function(r){ clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); },
       function(e){ clearTimeout(timer); throw e; }
     );
   })();
-  // Prevent "unhandled promise rejection" console warning — loadData() awaits and reports properly.
-  __dataPromise.catch(function(){});
+  __dataPromise.catch(function(){}); // handled in loadData()
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
@@ -536,11 +534,14 @@ function fetchWithTimeout(url, ms) {
 }
 
 async function fetchLive() {
-  // Reuse the head-prefetched promise on first call (saves 3-5s of cold start).
+  // Tier 1: head-prefetched same-origin JSON (firewall-immune, fastest).
   if (window.__dataPromise && !window.__dataPromiseConsumed) {
     window.__dataPromiseConsumed = true;
-    try { return await window.__dataPromise; } catch(e) { /* fall through to retry loop */ }
+    try { return await window.__dataPromise; } catch(e) { /* fall through */ }
   }
+  // Tier 2: same-origin JSON retry (in case head prefetch missed).
+  try { return await fetchWithTimeout('data/' + HA + '.json', 8000); } catch(e) { /* fall through */ }
+  // Tier 3: Apps Script fallback (covers stale/missing snapshot, slower and may fail behind strict firewalls).
   var lastErr;
   for (var i = 0; i < 3; i++) {
     try { return await fetchWithTimeout(PROXY + '?ha=' + HA, 12000); }

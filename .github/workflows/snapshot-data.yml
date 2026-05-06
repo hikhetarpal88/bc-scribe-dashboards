@@ -1,0 +1,58 @@
+name: Snapshot dashboard data
+
+# Pulls fresh data from the Apps Script proxy for each HA and commits it
+# as static JSON in /data. Dashboards fetch this file from the same origin,
+# bypassing corporate firewalls that block script.googleusercontent.com.
+
+on:
+  schedule:
+    # Every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}  # allow manual run from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: snapshot-data
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch data for each HA
+        env:
+          PROXY: https://script.google.com/macros/s/AKfycbw5mxQzV4m9nFrhHGDboWNx_MtBJOvMJ9725_wkfEg9TrrG2H9bd6dQYVCWSMGYlNZ7/exec
+        run: |
+          mkdir -p data
+          for HA in PHSA PHC VCH FHA VIHA IH NH; do
+            for attempt in 1 2 3; do
+              if curl -sS --fail --max-time 30 -L "$PROXY?ha=$HA" -o "data/$HA.json.tmp"; then
+                # Validate JSON and check it has expected shape
+                if python3 -c "import json,sys; d=json.load(open('data/$HA.json.tmp')); assert d.get('ha')=='$HA' and isinstance(d.get('data'), list); print(f'$HA: {d[\"count\"]} rows')"; then
+                  mv "data/$HA.json.tmp" "data/$HA.json"
+                  break
+                fi
+              fi
+              echo "$HA attempt $attempt failed, retrying..."
+              sleep $((attempt * 2))
+            done
+            rm -f "data/$HA.json.tmp"
+          done
+          ls -la data/
+
+      - name: Commit changes if any
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain data/)" ]; then
+            git add data/
+            git commit -m "data: refresh snapshot ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+            git push
+            echo "Snapshot committed and pushed."
+          else
+            echo "No data changes — nothing to commit."
+          fi

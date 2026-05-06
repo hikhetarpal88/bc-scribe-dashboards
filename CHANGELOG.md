@@ -4,6 +4,69 @@ All notable changes to these dashboards are documented here.
 
 ---
 
+## 2026-05-06 — v4.4 Deploy v4.3 + tightened timeouts and clearer error UX
+
+The v4.3 patches below were prepared on Apr 24 but never deployed (changes sat uncommitted). User reported the same "Failed to fetch" issue on May 6. Pushing v4.3 + tightening:
+
+### Changed — Tighter timeout budget (60s → ~36s worst case)
+- Head prefetch timeout: 20s → 15s (cold start is 3-5s; 15s is comfortable)
+- Each retry timeout: 20s → 12s (warm should be sub-second)
+- Worst-case total: 15s prefetch + 3×12s retries = ~51s, but in practice the retry loop usually succeeds on attempt 1 or 2
+
+### Changed — Loading message expectation
+- "first load can take up to 20s" → "first load can take 5-10 seconds" (matches measured TTFB)
+
+### Changed — Error message is more actionable
+- Old: "Could not load data: Failed to fetch — Retry"
+- New: "Could not load data (Failed to fetch). Retry · If retry keeps failing, hard refresh (Cmd/Ctrl+Shift+R) or try a different browser."
+- Mirrors Naomi's Friday troubleshooting suggestions so users get the same guidance baked into the UI
+
+### Pressure test results
+- 9/9 JS edge cases pass (HTTP 500 retry, malformed JSON, error-JSON detection, prefetch+flaky combos, multi-Retry, empty data, localStorage quota)
+- Endpoint health verified: 7/7 HAs respond in 1.7-4.4s; bad inputs return proper error JSON
+
+---
+
+## 2026-04-24 — v4.3 Fetch Reliability & Load-Time Fixes (all 7 dashboards + proxy)
+
+Triggered by user feedback: Bjorn Butow (NH) saw "Error: Failed to fetch"; Naomi Brooks (VCH) and Tim Graham (NH) reported slow loads and timeouts. Root cause was Google Apps Script cold-start (2.6–4.9s TTFB) combined with zero retry/timeout handling in the client.
+
+### Fixed — "Failed to fetch" error with no recovery
+- Fetch now retries up to 3 times with exponential backoff (1s, 2s) before surfacing an error
+- Error UI now shows a **Retry** link instead of a dead error string — one click re-runs `loadData()` without a full page reload
+- Transient network hiccups (corporate firewall redirect issues, brief DNS failures) now self-heal invisibly
+- `AbortError` timeouts now render as "Request timed out" instead of "Failed to fetch"
+
+### Added — Request timeout (20s)
+- Both the head-prefetch and the in-page fallback use `AbortController` to cap each attempt at 20 seconds
+- Prevents the indefinite hang users were seeing on first visit
+
+### Added — Server-side 60s cache on the Apps Script proxy
+- `apps-script-proxy.js` now uses `CacheService.getScriptCache()` with a 60-second TTL
+- Cold request still ~3-5s (unchanged); **warm requests drop to ~150-300ms** — the typical user experience
+- Cache key is per-HA (`ha_v1_<HA>`); 100KB limit handled gracefully
+- **Redeploy required**: Apps Script → Deploy → Manage deployments → New version
+
+### Added — Extra preconnects for Apps Script redirect target
+- Added `preconnect` + `dns-prefetch` for `script.googleusercontent.com`
+- Apps Script 302-redirects to this domain; preconnecting saves ~200–400ms of TLS handshake
+
+### Changed — Offline/cache handling
+- When a refresh fails but cached data exists, the header now appends "· offline (showing cached data)" instead of silently staying on stale cache
+- First-visit loading message is explicit: "Loading data… (first load can take up to 20s)"
+
+### Technical notes
+- Head prefetch now wrapped in `AbortController` + silenced unhandled-rejection (handled in `loadData`)
+- New helpers: `fetchWithTimeout(url, ms)` and `fetchLive()` (prefetch-first, then retry loop)
+- `__dataPromiseConsumed` flag prevents re-awaiting an already-rejected prefetch on Retry click
+- Chart.js load unchanged (blocking but preconnected — fast enough at ~70KB gzip)
+
+### QA
+- 6/6 fetch logic unit tests pass: success, retry-then-succeed, all-fail, prefetch-hit, prefetch-miss-fallback, AbortError propagation
+- All 7 dashboards patched identically (MD5-verified); JS syntax clean (`node --check`)
+
+---
+
 ## 2026-04-09 — v4.2 Footer Logo Strip (all 7 dashboards)
 
 ### Changed — Logos moved from header to footer

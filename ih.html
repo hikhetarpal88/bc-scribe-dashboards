@@ -6,10 +6,23 @@
 <title>IH — BC Scribe Self-Pay Program Dashboard</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link rel="dns-prefetch" href="https://script.google.com">
+<link rel="dns-prefetch" href="https://script.googleusercontent.com">
 <script>
-  // Start data fetch immediately (runs in parallel with Chart.js download)
-  var __dataPromise = fetch('https://script.google.com/macros/s/AKfycbw5mxQzV4m9nFrhHGDboWNx_MtBJOvMJ9725_wkfEg9TrrG2H9bd6dQYVCWSMGYlNZ7/exec?ha=IH').then(function(r){return r.json();});
+  // Start data fetch immediately with a 20s timeout (runs in parallel with Chart.js download).
+  // Retries/fallback are handled in loadData() below.
+  var __dataPromise = (function() {
+    var url = 'https://script.google.com/macros/s/AKfycbw5mxQzV4m9nFrhHGDboWNx_MtBJOvMJ9725_wkfEg9TrrG2H9bd6dQYVCWSMGYlNZ7/exec?ha=IH';
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function(){ if (ctrl) try{ctrl.abort();}catch(e){} }, 15000);
+    return fetch(url, ctrl ? {signal: ctrl.signal} : {}).then(
+      function(r){ clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); },
+      function(e){ clearTimeout(timer); throw e; }
+    );
+  })();
+  // Prevent "unhandled promise rejection" console warning — loadData() awaits and reports properly.
+  __dataPromise.catch(function(){});
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
@@ -513,25 +526,58 @@ function renderData(json, source) {
   applyFilters();
 }
 
+function fetchWithTimeout(url, ms) {
+  var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var timer = setTimeout(function(){ if (ctrl) try{ctrl.abort();}catch(e){} }, ms);
+  return fetch(url, ctrl ? {signal: ctrl.signal} : {}).then(
+    function(r){ clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); },
+    function(e){ clearTimeout(timer); throw e; }
+  );
+}
+
+async function fetchLive() {
+  // Reuse the head-prefetched promise on first call (saves 3-5s of cold start).
+  if (window.__dataPromise && !window.__dataPromiseConsumed) {
+    window.__dataPromiseConsumed = true;
+    try { return await window.__dataPromise; } catch(e) { /* fall through to retry loop */ }
+  }
+  var lastErr;
+  for (var i = 0; i < 3; i++) {
+    try { return await fetchWithTimeout(PROXY + '?ha=' + HA, 12000); }
+    catch(e) {
+      lastErr = e;
+      if (i < 2) await new Promise(function(r){ setTimeout(r, 1000 * (i + 1)); });
+    }
+  }
+  throw lastErr;
+}
+
 async function loadData() {
+  var info = document.getElementById('refreshInfo');
+
   // 1. Show cached data instantly if available
+  var hadCache = false;
   try {
     const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      const cacheJson = JSON.parse(cached);
-      renderData(cacheJson, 'cache');
-    }
+    if (cached) { renderData(JSON.parse(cached), 'cache'); hadCache = true; }
   } catch(e) {}
 
-  // 2. Fetch fresh data in background
+  if (!hadCache) info.textContent = 'Loading data\u2026 (first load can take 5-10 seconds)';
+
+  // 2. Fetch fresh data (prefetch-first, then retry with backoff)
   try {
-    const json = window.__dataPromise ? await window.__dataPromise : await fetch(PROXY + '?ha=' + HA).then(r=>r.json());
+    const json = await fetchLive();
     if (json.error) throw new Error(json.error);
     try { localStorage.setItem(CACHE_KEY, JSON.stringify(json)); } catch(e) {}
     renderData(json, 'live');
   } catch(e) {
+    var msg = (e && e.name === 'AbortError') ? 'Request timed out' : ((e && e.message) || 'Failed to load');
     if (!RAW_DATA.length) {
-      document.getElementById('refreshInfo').textContent = 'Error: ' + e.message;
+      info.innerHTML = 'Could not load data (' + esc(msg) + '). '
+        + '<a href="#" onclick="loadData();return false;" style="color:#fff;text-decoration:underline;font-weight:600;">Retry</a>'
+        + ' \u00b7 If retry keeps failing, hard refresh (Cmd/Ctrl+Shift+R) or try a different browser.';
+    } else {
+      info.textContent += ' \u00b7 offline (showing cached data)';
     }
   }
 }

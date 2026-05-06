@@ -11,17 +11,26 @@
 var SHEET_ID = '1gYbiE15xltGZeHkNzgyF8iJCmBko75IauWIUySouLvc';
 var SHEET_NAME = 'Sheet1';
 var VALID_HAS = ['PHSA', 'PHC', 'VCH', 'FHA', 'VIHA', 'IH', 'NH'];
+var CACHE_TTL_SECONDS = 60; // ScriptCache TTL — warm responses drop from ~3-5s to ~200ms
 
 function doGet(e) {
   var ha = (e.parameter.ha || '').toUpperCase().trim();
 
   // --- Validate -------------------------------------------------------
   if (!ha) {
-    return _json({ error: "Missing 'ha' parameter. Use ?ha=PHC etc." });
+    return _jsonObj({ error: "Missing 'ha' parameter. Use ?ha=PHC etc." });
   }
   if (VALID_HAS.indexOf(ha) === -1) {
-    return _json({ error: "Invalid HA: " + ha + ". Valid values: " + VALID_HAS.join(', ') });
+    return _jsonObj({ error: "Invalid HA: " + ha + ". Valid values: " + VALID_HAS.join(', ') });
   }
+
+  // --- Serve from cache if warm --------------------------------------
+  var cache = CacheService.getScriptCache();
+  var cacheKey = 'ha_v1_' + ha;
+  try {
+    var cached = cache.get(cacheKey);
+    if (cached) return _jsonString(cached);
+  } catch (err) { /* CacheService can fail under load — just bypass */ }
 
   // --- Read sheet -----------------------------------------------------
   try {
@@ -29,7 +38,7 @@ function doGet(e) {
     var sheet = ss.getSheetByName(SHEET_NAME);
     var data  = sheet.getDataRange().getValues();
   } catch (err) {
-    return _json({ error: "Could not read sheet: " + err.message });
+    return _jsonObj({ error: "Could not read sheet: " + err.message });
   }
 
   // --- Map headers ----------------------------------------------------
@@ -37,7 +46,7 @@ function doGet(e) {
   var haCol   = headers.indexOf('Health Authority');
 
   if (haCol === -1) {
-    return _json({ error: "Column 'Health Authority' not found in sheet." });
+    return _jsonObj({ error: "Column 'Health Authority' not found in sheet." });
   }
 
   // --- Filter rows ----------------------------------------------------
@@ -58,17 +67,24 @@ function doGet(e) {
     }
   }
 
-  // --- Return ---------------------------------------------------------
-  return _json({
+  // --- Serialize + cache + return -------------------------------------
+  var body = JSON.stringify({
     ha: ha,
     count: rows.length,
     timestamp: new Date().toISOString(),
     data: rows
   });
+  // CacheService.put has a 100KB value limit — skip cache for oversize payloads.
+  if (body.length < 95000) {
+    try { cache.put(cacheKey, body, CACHE_TTL_SECONDS); } catch (err) {}
+  }
+  return _jsonString(body);
 }
 
-function _json(obj) {
+function _jsonObj(obj) { return _jsonString(JSON.stringify(obj)); }
+
+function _jsonString(s) {
   return ContentService
-    .createTextOutput(JSON.stringify(obj))
+    .createTextOutput(s)
     .setMimeType(ContentService.MimeType.JSON);
 }

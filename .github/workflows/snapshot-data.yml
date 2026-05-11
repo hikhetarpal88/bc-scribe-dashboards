@@ -6,8 +6,10 @@ name: Snapshot dashboard data
 
 on:
   schedule:
-    # Every 15 minutes
-    - cron: '*/15 * * * *'
+    # Every 15 minutes, but offset from :00/:15/:30/:45 — those are GitHub Actions
+    # peak-load minutes and scheduled workflows get heavily throttled there.
+    # Using :07/:22/:37/:52 dramatically improves on-time delivery.
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch: {}  # allow manual run from the Actions tab
 
 permissions:
@@ -48,11 +50,24 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -n "$(git status --porcelain data/)" ]; then
-            git add data/
-            git commit -m "data: refresh snapshot ($(date -u '+%Y-%m-%d %H:%M UTC'))"
-            git push
-            echo "Snapshot committed and pushed."
-          else
+          if [ -z "$(git status --porcelain data/)" ]; then
             echo "No data changes — nothing to commit."
+            exit 0
           fi
+          git add data/
+          git commit -m "data: refresh snapshot ($(date -u '+%Y-%m-%d %H:%M UTC'))"
+          # Retry git push up to 5 times — guards against transient GitHub 5xx
+          # and races with concurrent commits to main (rebase before each retry).
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              echo "Snapshot pushed on attempt $attempt."
+              exit 0
+            fi
+            echo "Push attempt $attempt failed."
+            if [ $attempt -lt 5 ]; then
+              sleep $((attempt * 5))
+              git pull --rebase --autostash || true
+            fi
+          done
+          echo "All 5 push attempts failed."
+          exit 1

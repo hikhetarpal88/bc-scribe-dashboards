@@ -4,6 +4,27 @@ All notable changes to these dashboards are documented here.
 
 ---
 
+## 2026-05-11 — v4.5.1 Workflow hardening
+
+User got a failure-email notification from GitHub for snapshot run #68. Investigated:
+- Run #68 failed because `git push` returned **HTTP 500 Internal Server Error** from GitHub itself (transient flake on their end). 7 files were committed locally but the push couldn't reach the remote.
+- Separately, the `*/15` cron was hitting GitHub Actions' peak-load minutes (`:00, :15, :30, :45`), causing the scheduler to throttle our runs — we were getting roughly hourly instead of every-15-min, with data stale up to 3+ hours.
+
+### Fixed — push retries on transient GitHub server errors
+- `git push` now retries up to 5 times with exponential backoff (5s, 10s, 15s, 20s)
+- Between retries: `git pull --rebase --autostash` to handle any race with concurrent commits
+- Workflow only fails if all 5 attempts fail (vs. failing on the first transient 500)
+
+### Fixed — cron throttling on free-tier GitHub Actions
+- Cron changed from `*/15 * * * *` → `7,22,37,52 * * * *`
+- Avoiding `:00/:15/:30/:45` minutes (which all heavy users default to) dramatically improves on-time scheduled execution
+
+### Impact
+- The data was up to ~3 hours stale at the time the user noticed; after this fix scheduled runs should land within a few minutes of their target every time
+- Apps Script fallback was always available, so no user-facing outage occurred
+
+---
+
 ## 2026-05-06 — v4.5 Static JSON snapshots — fixes NH firewall blocking
 
 Multiple Northern Health users (Tim, Bjorn, +1) still saw "Failed to fetch" after v4.4, even after hard refresh and switching browsers. Root cause confirmed via redirect-chain inspection: every dashboard request bounces from `script.google.com` → `script.googleusercontent.com`, and NH's corporate firewall blocks the second domain.

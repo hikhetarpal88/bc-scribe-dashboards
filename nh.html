@@ -310,7 +310,7 @@
     <div class="metric"><div class="value" id="totalSpecialties">-</div><div class="label">Specialties</div></div>
   </div>
 </div>
-<div class="data-note">Providers who signed up on or after December 3, 2025</div>
+<div class="data-note">Counts each provider once per vendor they signed up with. Sign-ups on or after December 3, 2025.</div>
 <div class="exec-summary" id="execSummary"></div>
 
 <div class="content">
@@ -504,22 +504,33 @@ function cleanData(rows) {
   });
 }
 
+// Dedup by (email + vendor): removes vendor-side duplicate reports while preserving
+// legitimate multi-vendor signups (a single provider who signed up with >1 scribe).
+// Stores the number of duplicates removed so the UI can be transparent about it.
+let DUP_COUNT = 0;
 function dedup(rows) {
   const seen = new Set();
-  return rows.filter(r => {
+  let removed = 0;
+  const out = rows.filter(r => {
     const email = (r['Health Authority Email']||'').toLowerCase().trim();
-    if (!email) return true;
-    if (seen.has(email)) return false;
-    seen.add(email);
+    const vendor = (r['Vendor']||'').trim();
+    if (!email) return true; // can't dedup without an email; keep the row
+    const key = email + '|' + vendor;
+    if (seen.has(key)) { removed++; return false; }
+    seen.add(key);
     return true;
   });
+  DUP_COUNT = removed;
+  return out;
 }
 
 function renderData(json, source) {
   RAW_DATA = dedup(cleanData(json.data || []));
   const ts = new Date(json.timestamp).toLocaleString();
   document.getElementById('refreshInfo').textContent =
-    'Last refreshed: ' + ts + ' \u2014 ' + RAW_DATA.length + ' providers' + (source === 'cache' ? ' (updating\u2026)' : '');
+    'Last refreshed: ' + ts + ' \u2014 ' + RAW_DATA.length + ' sign-ups'
+    + (DUP_COUNT > 0 ? ' (' + DUP_COUNT + ' duplicate entries removed)' : '')
+    + (source === 'cache' ? ' \u2014 updating\u2026' : '');
   populateFilters();
   applyFilters();
 }

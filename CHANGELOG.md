@@ -4,6 +4,37 @@ All notable changes to these dashboards are documented here.
 
 ---
 
+## 2026-05-11 — v4.6 Smarter dedup + transparent counts
+
+User flagged that PHSA showed 179 providers when the raw data had 226 — a 47-row gap. Audited all 7 HAs.
+
+### Root cause (data quality, not a bug per se)
+- **Heidi is double-reporting**: 19.2% of Heidi's 772 rows are exact duplicates (same email + same vendor reported 2x). 148 dup rows across the master sheet.
+- Empathia: 1.1% dup rate (1 of 87 rows) — basically clean
+- Scribeberry: 0% (9 rows, all unique)
+- Total: 149 duplicate rows out of 868 (~17% of sheet)
+
+The previous dedup logic was hiding these data quality issues but also silently undercounting legitimate multi-vendor signups (1 person in PHSA enrolled with both Empathia and Heidi).
+
+### Changed — Dedup by (email + vendor) instead of email alone
+- Removes vendor-side duplicate reports (Heidi's double-reporting)
+- Preserves multi-vendor signups (each enrollment counts once)
+- Impact on counts: PHSA 179 → 180 (+1, Alastair Williams now counted twice — once per vendor). All other HAs unchanged.
+
+### Changed — Refresh-info line now shows duplicate count
+- Old: "Last refreshed: ... — 179 providers"
+- New: "Last refreshed: ... — 180 sign-ups (46 duplicate entries removed)"
+- Makes it obvious to stakeholders what was cleaned
+
+### Changed — Data-note under scorecards is clearer
+- Old: "Providers who signed up on or after December 3, 2025"
+- New: "Counts each provider once per vendor they signed up with. Sign-ups on or after December 3, 2025."
+
+### Action item for the program team
+Raise the duplicate-reporting issue with Heidi. Their reports are inflating their own counts by ~19% which makes reconciliation against the dashboard confusing.
+
+---
+
 ## 2026-05-11 — v4.5.1 Workflow hardening
 
 User got a failure-email notification from GitHub for snapshot run #68. Investigated:

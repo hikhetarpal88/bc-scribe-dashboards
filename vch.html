@@ -529,7 +529,7 @@ function renderData(json, source) {
   const ts = new Date(json.timestamp).toLocaleString();
   document.getElementById('refreshInfo').textContent =
     'Last refreshed: ' + ts + ' \u2014 ' + RAW_DATA.length + ' sign-ups'
-    + (DUP_COUNT > 0 ? ' (' + DUP_COUNT + ' duplicate entries removed)' : '')
+    + (DUP_COUNT > 0 ? ' (' + DUP_COUNT + ' duplicate ' + (DUP_COUNT === 1 ? 'entry' : 'entries') + ' removed)' : '')
     + (source === 'cache' ? ' \u2014 updating\u2026' : '');
   populateFilters();
   applyFilters();
